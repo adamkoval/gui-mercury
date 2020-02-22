@@ -74,7 +74,7 @@
  74 36  lost mass due to rotational breakup
  75 24  removed due to small a
  76  0 
- 77 47  Big Body radii in    km  and   AU/r
+ 77  0 
  78  0 
  79  0 
  80  0 
@@ -169,8 +169,8 @@
 169 33  express time in days or years = 
 170 51  express time relative to integration start time = 
 171 20  output precision = 
-172 21  global parameter1 = 
-173 21  global parameter2 = 
+172 24  < Not used at present > 
+173 37  include relativity in integration = 
 174 30  include user-defined force = 
 175 52 ) These parameters do not need to be adjusted often:
 176 26  ejection distance (AU) = 
@@ -179,8 +179,8 @@
 179 14  central J2 = 
 180 14  central J4 = 
 181 14  central J6 = 
-182 21  global parameter3 = 
-183 21  global parameter4 = 
+182 24  < Not used at present > 
+183 24  < Not used at present > 
 184 45  Hybrid integrator changeover (Hill radii) = 
 185 42  number of timesteps between data dumps = 
 186 48  number of timesteps between periodic effects = 
