@@ -38,8 +38,6 @@ class SetupPage(tk.Frame):
                 command=lambda: pu.TextEditor(self, "../mcm/converter/close.in"))
 
 
-
-
 class AnalysisPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -50,6 +48,9 @@ class SimPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
+
+        no_sims = pu.GenericInput(self).value
+        button = pu.GenericButton(self, text="GO!", command = lambda:print(no_sims))
 
 
 class SetupPopup(tk.Toplevel):
