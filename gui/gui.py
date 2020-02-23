@@ -1,6 +1,5 @@
 import tkinter as tk
 
-import func as fn
 import pages as pg
 import page_utils as pu
 #
