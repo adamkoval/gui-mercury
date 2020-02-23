@@ -1,6 +1,5 @@
 import tkinter as tk
 
-import func as fn
 #
 #   Utilities to be used in pages
 #
@@ -30,6 +29,7 @@ class GenericButton(tk.Button):
 class NavButton(tk.Frame):
     def __init__(self, parent, controller, text, dest, col):
         tk.Frame.__init__(self, parent)
+
         button = tk.Button(parent, text=text,
                 command=lambda: controller.show_page(dest))
         button.grid(row=0, column=col)
@@ -38,6 +38,7 @@ class NavButton(tk.Frame):
 class NavBar(tk.Frame):
     def __init__(self, parent, controller, buttons):
         tk.Frame.__init__(self, parent)
+
         self.controller = controller
         for i, text in enumerate(buttons):
             dest = buttons[text]
@@ -45,11 +46,20 @@ class NavBar(tk.Frame):
         self.pack()
 
 
-class GenericInput(tk.Entry):
-    def __init__(self, parent):
-        tk.Entry.__init__(self, parent)
+class GenericInput(tk.Frame):
+    def __init__(self, parent, label):
+        tk.Frame.__init__(self, parent)
+
+        label = tk.Label(self, text=label)
+        label.pack(side="left")
+        self.field = tk.Entry(self)
+        self.field.pack(side="right")
         self.pack()
-        self.value = self.get()
+
+    def get_input(self):
+        value = self.field.get()
+        return value
+
 
 """
 SETUP PAGE
@@ -118,7 +128,10 @@ class NoSetupPopup(tk.Toplevel):
 """
 SIMULATION PAGE
 """
-
+def get_entries(entry_objects, dct):
+    for obj in entry_objects:
+        dct[obj] = obj.get_input()
+    return dct
 
 """
 ANALYSIS PAGE
