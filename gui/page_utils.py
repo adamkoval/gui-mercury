@@ -45,6 +45,12 @@ class NavBar(tk.Frame):
         self.pack()
 
 
+class GenericInput(tk.Entry):
+    def __init__(self, parent):
+        tk.Entry.__init__(self, parent)
+        self.pack()
+        self.value = self.get()
+
 """
 SETUP PAGE
 """
@@ -74,7 +80,6 @@ class TextEditor(tk.Toplevel):
         f.write(text)
         f.close()
         self.parent.destroy()
-
 
 
 class TextWindow(tk.Frame):
