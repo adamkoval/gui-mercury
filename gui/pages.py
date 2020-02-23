@@ -2,7 +2,6 @@ import tkinter as tk
 
 import os
 
-import func as fn
 import page_utils as pu
 
 #
@@ -49,8 +48,22 @@ class SimPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
-        no_sims = pu.GenericInput(self).value
-        button = pu.GenericButton(self, text="GO!", command = lambda:print(no_sims))
+        no_sims = pu.GenericInput(self, "No. sims")
+        pnos = pu.GenericInput(self, "No. parallel")
+        entry_objects = (no_sims, pnos)
+        dct = {}
+        store_button = pu.GenericButton(self, text="Store",
+                command=lambda: pu.get_entries(entry_objects, dct))
+
+        #print_button = pu.GenericButton(self, text="Print",
+        #        command=lambda: print(dct))
+
+
+#    def get_entries(entry_objects):
+#        dct = {}
+#        for obj in entry_objects:
+#            dct[obj] = obj.get_input()
+#        return dct
 
 
 class SetupPopup(tk.Toplevel):
