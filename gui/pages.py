@@ -18,23 +18,37 @@ class SetupPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Setup")
 
-        label = tk.Label(self, text="Pre-sim setup",
-                font=("Courier", 15))
-        label.pack()
-        paramin_button = pu.GenericButton(self, text="Edit param.in",
-                command=lambda: pu.TextEditor(self, "setup/param.in"))
-        bigin_button = pu.GenericButton(parent=self, text="Edit big.in",
-                command=lambda: pu.TextEditor(self, "setup/big.in"))
-        smallin_button = pu.GenericButton(parent=self, text="Edit small.in",
-                command=lambda: pu.TextEditor(self, "setup/small.in"))
+        categories = {}
+        categories[0] = self.category(self, "Pre-sim setup")
+        paramin_button = pu.GenericButton(parent=categories[0], text="Edit param.in",
+                command=lambda: pu.TextEditor(categories[0], "setup/param.in"))
+        bigin_button = pu.GenericButton(parent=categories[0], text="Edit big.in",
+                command=lambda: pu.TextEditor(categories[0], "setup/big.in"))
+        smallin_button = pu.GenericButton(parent=categories[0], text="Edit small.in",
+                command=lambda: pu.TextEditor(categories[0], "setup/small.in"))
 
-        label = tk.Label(self, text="Data conversion",
-                font=("Courier", 15))
+        categories[1] = self.category(self, "Simulation")
+        nosimss = pu.GenericInput(categories[1], "No. sims")
+        pnos = pu.GenericInput(categories[1], "No. parallel")
+        entry_objects = (nosimss, pnos)
+        nos = {}
+        store_button = pu.GenericButton(categories[1], text="Save No. sims & no. parallel",
+                command=lambda: pu.get_entries(entry_objects, nos))
+
+        categories[2] = self.category(self, "Simulation")
+        paramin_button = pu.GenericButton(categories[2], text="Edit element.in",
+                command=lambda: pu.TextEditor(categories[2], "../mcm/converter/element.in"))
+        bigin_button = pu.GenericButton(parent=categories[2], text="Edit close.in",
+                command=lambda: pu.TextEditor(categories[2], "../mcm/converter/close.in"))
+
+        for i in categories:
+            categories[i].pack(fill='both')
+
+    def category(self, parent, title):
+        category = tk.Frame(self, bd=5, relief="sunken")
+        label = tk.Label(category, text=title, font=("Courier", 15))
         label.pack()
-        paramin_button = pu.GenericButton(self, text="Edit element.in",
-                command=lambda: pu.TextEditor(self, "../mcm/converter/element.in"))
-        bigin_button = pu.GenericButton(parent=self, text="Edit close.in",
-                command=lambda: pu.TextEditor(self, "../mcm/converter/close.in"))
+        return category
 
 
 class AnalysisPage(tk.Frame):
@@ -48,22 +62,9 @@ class SimPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
-        no_sims = pu.GenericInput(self, "No. sims")
-        pnos = pu.GenericInput(self, "No. parallel")
-        entry_objects = (no_sims, pnos)
-        dct = {}
-        store_button = pu.GenericButton(self, text="Store",
-                command=lambda: pu.get_entries(entry_objects, dct))
-
-        #print_button = pu.GenericButton(self, text="Print",
-        #        command=lambda: print(dct))
-
-
-#    def get_entries(entry_objects):
-#        dct = {}
-#        for obj in entry_objects:
-#            dct[obj] = obj.get_input()
-#        return dct
+        go_button = pu.GenericButton(self, text="Run",
+                command=lambda: print("Running sims."))
+        status_box = pu.StatusBox(self)
 
 
 class SetupPopup(tk.Toplevel):
