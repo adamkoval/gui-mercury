@@ -23,7 +23,7 @@ class GenericPage(tk.Frame):
 class GenericButton(tk.Button):
     def __init__(self, parent, text, command):
         tk.Button.__init__(self, parent, text=text, command=command)
-        self.pack()
+        self.pack() # DEBUG
 
 
 class NavButton(tk.Frame):
@@ -104,7 +104,7 @@ class TextWindow(tk.Frame):
         textbox.insert(1.0, text)
 
         scrollbar = tk.Scrollbar(parent, orient="vertical", command=textbox.yview)
-        scrollbar.pack(side="right", expand=True, fill="y")
+        scrollbar.pack(side="right", expand=True, fill='y')
 
 
     def save_file(self):
@@ -118,6 +118,7 @@ class TextWindow(tk.Frame):
 class NoSetupPopup(tk.Toplevel):
     def __init__(self, parent):
         tk.Toplevel.__init__(self, parent)
+
         label = tk.Label(self, text="No previous setup detected.\nPlease go to the 'Setup' page.")
         label.pack()
         button = tk.Button(self, text="OK",
@@ -132,6 +133,13 @@ def get_entries(entry_objects, dct):
     for obj in entry_objects:
         dct[obj] = obj.get_input()
     return dct
+
+
+class StatusBox(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+
+        self.pack()
 
 """
 ANALYSIS PAGE
