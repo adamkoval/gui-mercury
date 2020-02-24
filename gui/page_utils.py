@@ -23,7 +23,7 @@ class GenericPage(tk.Frame):
 class GenericButton(tk.Button):
     def __init__(self, parent, text, command):
         tk.Button.__init__(self, parent, text=text, command=command)
-        self.pack() # DEBUG
+        self.pack()
 
 
 class NavButton(tk.Frame):
