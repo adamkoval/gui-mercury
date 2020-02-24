@@ -89,7 +89,7 @@ class TextEditor(tk.Toplevel):
         f = open(self.file, 'w')
         f.write(text)
         f.close()
-        self.parent.destroy()
+        self.destroy()
 
 
 class TextWindow(tk.Frame):
