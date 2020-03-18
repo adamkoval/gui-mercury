@@ -12,6 +12,21 @@ class HomePage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Home")
 
+        container = tk.Frame(self, bd=5, relief="sunken")
+        container.pack()
+
+        welcome = tk.Label(container, text="MERCURY_gui",
+                font=("adura", 15))
+        welcome.pack()
+        blurb = tk.Label(container, text=("Welcome to the MERCURY6 gui.\n"
+                + "This gui was created as a university assignment.\n"
+                + "It is intended to be used as a quick-start tool\n"
+                + "for students working with the MERCURY6 symplectic\n"
+                + "integrator."), font=("adura", 13))
+        blurb.pack()
+        signed = tk.Label(container, text="Written by A. Koval, in the year 2020.")
+        signed.pack()
+
 
 class SetupPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -19,23 +34,21 @@ class SetupPage(tk.Frame):
         pu.GenericPage(self, controller, "Setup")
 
         categories = {}
-        categories[0] = self.category(self, "Pre-sim setup")
-        paramin_button = pu.GenericButton(parent=categories[0], text="Edit param.in",
+        categories[0] = self.category(self, "Simulation")
+        paramin_button = pu.GenericButton(parent=categories[0], text="Simulation parameters",
                 command=lambda: pu.TextEditor(categories[0], "setup/param.in"))
-        bigin_button = pu.GenericButton(parent=categories[0], text="Edit big.in",
+        bigin_button = pu.GenericButton(parent=categories[0], text="Big bodies",
                 command=lambda: pu.TextEditor(categories[0], "setup/big.in"))
-        smallin_button = pu.GenericButton(parent=categories[0], text="Edit small.in",
+        smallin_button = pu.GenericButton(parent=categories[0], text="Small bodies",
                 command=lambda: pu.TextEditor(categories[0], "setup/small.in"))
-
-        categories[1] = self.category(self, "Simulation")
-        nosimss = pu.GenericInput(categories[1], "No. sims")
-        pnos = pu.GenericInput(categories[1], "No. parallel")
+        nosimss = pu.GenericInput(categories[0], "No. sims")
+        pnos = pu.GenericInput(categories[0], "No. parallel")
         entry_objects = (nosimss, pnos)
         nos = {}
-        store_button = pu.GenericButton(categories[1], text="Save No. sims & no. parallel",
+        store_button = pu.GenericButton(categories[0], text="Save config",
                 command=lambda: pu.get_entries(entry_objects, nos))
 
-        categories[2] = self.category(self, "Simulation")
+        categories[2] = self.category(self, "Data conversion")
         paramin_button = pu.GenericButton(categories[2], text="Edit element.in",
                 command=lambda: pu.TextEditor(categories[2], "../mcm/converter/element.in"))
         bigin_button = pu.GenericButton(parent=categories[2], text="Edit close.in",
@@ -62,9 +75,10 @@ class SimPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
-        go_button = pu.GenericButton(self, text="Run",
-                command=lambda: print("Running sims."))
         status_box = pu.StatusBox(self)
+        status_box.status_var.set('Hello')
+        go_button = pu.GenericButton(self, text="Run",
+                command=lambda: status_box.status_var.set("Running sim."))
 
 
 class SetupPopup(tk.Toplevel):
