@@ -2,7 +2,7 @@
 envfile.txt
 
 # Ignore completed simulation output directory
-# which is generated unpon running the code
+# (which is generated unpon running the code)
 *completed*/
 
 # Mercury folder (as this should be built for each os separately)
@@ -25,3 +25,6 @@ mcm/resonance_graph.pdf
 #test_*.py
 analysis/figures/
 study/
+
+# Setup dir + files
+gui/setup/
