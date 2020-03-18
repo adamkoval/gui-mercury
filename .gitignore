@@ -27,4 +27,4 @@ analysis/figures/
 study/
 
 # Setup dir + files
-gui/setup/
+gui/setup/*
