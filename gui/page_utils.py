@@ -15,7 +15,8 @@ class GenericPage(tk.Frame):
                 "Analysis": 'AnalysisPage'}
         buttons = {key: all_buttons[key] for key in all_buttons if key != page_name}
         tk.Frame.__init__(self, parent)
-        label = tk.Label(parent, text=page_name)
+        label = tk.Label(parent, text=page_name,
+                font=("calibri", 15))
         label.pack()
         navbar = NavBar(parent, controller, buttons)
 
@@ -43,15 +44,15 @@ class NavBar(tk.Frame):
         for i, text in enumerate(buttons):
             dest = buttons[text]
             NavButton(self, controller, text, dest, i)
-        self.pack()
+        self.pack(side="bottom")
 
 
 class GenericInput(tk.Frame):
     def __init__(self, parent, label):
         tk.Frame.__init__(self, parent)
 
-        label = tk.Label(self, text=label)
-        label.pack(side="left")
+        self.label = tk.Label(self, text=label)
+        self.label.pack(side="left")
         self.field = tk.Entry(self)
         self.field.pack(side="right")
         self.pack()
@@ -130,16 +131,23 @@ class NoSetupPopup(tk.Toplevel):
 SIMULATION PAGE
 """
 def get_entries(entry_objects, dct):
+    f = open("setup/cfg.in", "w")
     for obj in entry_objects:
         dct[obj] = obj.get_input()
+        f.write("{}: {}\n".format(obj.label["text"], dct[obj]))
+    f.close()
     return dct
 
 
 class StatusBox(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-
         self.pack()
+
+        self.status_var = tk.StringVar(self)
+        label = tk.Label(self, textvariable=self.status_var)
+        label.pack()
+
 
 """
 ANALYSIS PAGE
