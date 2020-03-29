@@ -76,9 +76,9 @@ class SimPage(tk.Frame):
         pu.GenericPage(self, controller, "Simulation")
 
         status_box = pu.StatusBox(self)
-        status_box.status_var.set('Hello')
+        status_box.status_var.set("Ready to run.")
         go_button = pu.GenericButton(self, text="Run",
-                command=lambda: status_box.status_var.set("Running sim."))
+                command=lambda: pu.run_sims(status_box))
 
 
 class SetupPopup(tk.Toplevel):
