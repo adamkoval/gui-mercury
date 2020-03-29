@@ -127,9 +127,6 @@ class NoSetupPopup(tk.Toplevel):
         button.pack()
 
 
-"""
-SIMULATION PAGE
-"""
 def get_entries(entry_objects, dct):
     f = open("setup/cfg.in", "w")
     for obj in entry_objects:
@@ -139,6 +136,9 @@ def get_entries(entry_objects, dct):
     return dct
 
 
+"""
+SIMULATION PAGE
+"""
 class StatusBox(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -148,6 +148,45 @@ class StatusBox(tk.Frame):
         label = tk.Label(self, textvariable=self.status_var)
         label.pack()
 
+
+def get_entries(entry_objects, dct):
+    f = open("setup/cfg.in", "w")
+    for obj in entry_objects:
+        dct[obj] = obj.get_input()
+        f.write("{}: {}\n".format(obj.label["text"], dct[obj]))
+    f.close()
+    return dct
+
+
+def read_cfg(cfgin):
+    f = open(cfgin, "r")
+    lines = f.readlines()
+    dct = {}
+    for line in lines:
+        var, val = line.split(":")
+        dct[var] = val
+    return dct
+
+
+def run_sims(status_box):
+    cfg = read_cfg("setup/cfg.in")
+    cfg_str = "".join(["{}:{}".format(var, cfg[var]) for var in cfg])
+    status_str = """Simulation config:\n
+    {}
+    Running sims.
+    """.format(cfg_str)
+    status_box.status_var.set(status_str)
+
+    n_sims = int(cfg["No. sims"])
+    n_parallel = int(cfg["No. parallel"])
+    no_per_pno = n_sims // n_parallel
+    no_cumulative = 0
+    for pno in range(1, n_parallel+1):
+        if not pno == n_parallel:
+            print("python3 0main.py -no {} -pno {}".format(no_per_pno, pno))
+        else:
+            print("python3 0main.py -no {} -pno {}".format(n_sims - no_cumulative, pno))
+        no_cumulative += no_per_pno
 
 """
 ANALYSIS PAGE
