@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 
 #
@@ -181,12 +182,15 @@ def run_sims(status_box):
     n_parallel = int(cfg["No. parallel"])
     no_per_pno = n_sims // n_parallel
     no_cumulative = 0
+
+    os.chdir("../mcm/")
     for pno in range(1, n_parallel+1):
         if not pno == n_parallel:
-            print("python3 0main.py -no {} -pno {}".format(no_per_pno, pno))
+            os.system("python3 0main.py -no {} -pno {}".format(no_per_pno, pno))
         else:
-            print("python3 0main.py -no {} -pno {}".format(n_sims - no_cumulative, pno))
+            os.system("python3 0main.py -no {} -pno {}".format(n_sims - no_cumulative, pno))
         no_cumulative += no_per_pno
+    os.chdir("../gui/")
 
 """
 ANALYSIS PAGE
