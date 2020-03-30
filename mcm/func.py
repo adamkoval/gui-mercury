@@ -6,6 +6,7 @@
 import numpy as np
 import os
 import sys
+import shutil
 
 def read_envfile(envfile):
     """
@@ -14,8 +15,9 @@ def read_envfile(envfile):
     In:
         > envfile - (str) path to envfile.txt
     Out:
-        > pyenv, bashenv - (str) paths to python and bash
-        environments.
+        > pyenv, bashenv, mercury_path, results_path -
+        (str) paths to python and bash environments +
+        results and mercury paths.
     """
     with open(envfile, 'r') as f:
         lines = [line for line in f.readlines() if line[0] is not '#']
@@ -56,48 +58,71 @@ def disp(res_float, fraction, direction=''):
     return disp
 
 
-def count_completed(res_str):
+def count_completed(results_path):
     """
-    Counts number of files present in the 'completed' directory of
-    the given resonance.
+    Counts number of files present in the results directory.
     In:
-        > res_str - (str) specifies the resonance
-        under consideration, e.g., '53', '5:3', '5-3'
+        > results_path - (str) path to results directory
     Out:
         > N_completed - (int) number of completed runs
         present in the directory.
     """
-    print(' ~~~~~~~~~~~~~~~~~~~~~~~~\n',
-          'func.py/count_completed():\n',
-          'Checking completed directory for the {}:{} resonance.\n'.format(*res_str))
-    dirs = ['planets', 'info', 'input']
+    #print(' ~~~~~~~~~~~~~~~~~~~~~~~~\n',
+    #      'func.py/count_completed():\n',
+    #      'Checking results directory.\n')
+    dirs = ['inputs', 'outputs']
     numbers = {}
     for _dir in dirs:
-        numbers[_dir] = len(os.listdir('../completed/{}/{}'.format(res_str, _dir)))
+        numbers[_dir] = len(os.listdir('{}/{}'.format(results_path, _dir)))
 
-    if numbers['planets']//2 == numbers['info'] == numbers['input']:
-        N_completed = int(numbers['info'])
-        return N_completed
-    else:
-        print(' Please check the numbers of runs in each directory:\n',
-              '     N_planets: {}\n'.format(numbers['planets']//2),
-              '     N_info: {}\n'.format(numbers['info']),
-              '     N_input: {}\n'.format(numbers['input']),
-              '~~~~~~~~~~~~~~~~~~~~~~~~\n')
-        sys.exit()
+    N_completed = int(numbers['inputs'])//3
+    return N_completed
 
-def make_directories(res_str):
+    #if numbers['inputs'] == numbers['outputs']:
+    #    N_completed = int(numbers['inputs'])//3
+    #    return N_completed
+    #else:
+    #    print(' Please check the numbers of runs in each output directory:\n',
+    #          '     N_inputs: {}\n'.format(numbers['inputs']),
+    #          '     N_outputs: {}\n'.format(numbers['outputs']),
+    #          '~~~~~~~~~~~~~~~~~~~~~~~~\n')
+    #    sys.exit()
+
+
+def make_rsltpath(results_path):
+    """
+    Create directory into which simulation results are placed.
+    """
     def make_if(path):
         if not os.path.exists(path):
             os.mkdir(path)
         else:
             pass
 
-    paths = ['../completed',
-             '../completed/{}'.format(res_str),
-             '../completed/{}/planets'.format(res_str),
-             '../completed/{}/info'.format(res_str),
-             '../completed/{}/input'.format(res_str)]
+    paths = ["{}".format(results_path),
+             "{}/outputs".format(results_path),
+             "{}/inputs".format(results_path)]
 
     for path in paths:
         make_if(path)
+
+
+class mercury_instance:
+    """
+    Offers utilities to create and destroy a mercury instance from
+    the compiled git version.
+    """
+    def __init__(self, pno, mercury_og):
+        self.pno = pno
+        self.mercury_og = mercury_og
+
+    def create(self):
+        os.mkdir("mercury_{}".format(self.pno))
+        for file in ["files.in", "mercury6", "message.in"]:
+            shutil.copyfile("{}/{}".format(self.mercury_og, file), "mercury_{}/{}".format(self.pno, file))
+        os.system("chmod +x mercury_{}/mercury6".format(self.pno))
+        for file in ["big.in", "param.in", "small.in"]:
+            shutil.copyfile("../gui/setup/{}".format(file), "mercury_{}/{}".format(self.pno, file))
+
+    def destroy(self):
+        shutil.rmtree("mercury_{}".format(self.pno), ignore_errors=True)
