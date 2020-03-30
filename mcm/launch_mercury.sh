@@ -2,4 +2,4 @@
 
 pno=$1
 
-(cd mercury_$pno/; ./mercury.exe)
+(cd mercury_$pno/; ./mercury6)
