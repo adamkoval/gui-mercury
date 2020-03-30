@@ -1,6 +1,11 @@
 import os
+import sys
+import shutil
 import tkinter as tk
+from subprocess import Popen
+sys.path.append("../")
 
+import mcm.func as mcfn
 #
 #   Utilities to be used in pages
 #
@@ -178,19 +183,24 @@ def run_sims(status_box):
     """.format(cfg_str)
     status_box.status_var.set(status_str)
 
-    n_sims = int(cfg["No. sims"])
+    N_sims = int(cfg["No. sims"])
     n_parallel = int(cfg["No. parallel"])
-    no_per_pno = n_sims // n_parallel
-    no_cumulative = 0
+    n_per_pno = N_sims // n_parallel
+    n_cumu = 0
 
     os.chdir("../mcm/")
+    cmd_str = []
     for pno in range(1, n_parallel+1):
         if not pno == n_parallel:
-            os.system("python3 0main.py -no {} -pno {}".format(no_per_pno, pno))
+            n_sims = n_per_pno
         else:
-            os.system("python3 0main.py -no {} -pno {}".format(n_sims - no_cumulative, pno))
-        no_cumulative += no_per_pno
+            n_sims = N_sims - n_cumu
+        cmd_str.append("python3 ../mcm/0main.py -no {} -pno {} & ".format(n_sims, pno))
+        n_cumu += n_per_pno
+    cmd_str = "".join(cmd_str)
+    os.system(cmd_str)
     os.chdir("../gui/")
+
 
 """
 ANALYSIS PAGE
