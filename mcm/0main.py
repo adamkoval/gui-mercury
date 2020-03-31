@@ -42,9 +42,13 @@ while k < N_runs:
     #      "0main.py:\n",
     #      "Run = {}\n".format(k))
 
-    ## Randomizing input
-    #p_randomize = Popen([pyenv, "randomize.py", "-res", res_str, "-pno", pno])
-    #p_randomize.wait()
+    # Generate small.in
+    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(k), "-btype", "small"])
+    p_randomize.wait()
+
+    # Generate big.in
+    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(k), "-btype", "big"])
+    p_randomize.wait()
 
     # Cleaning up old files from mercury dir
     p_cleanup = Popen([bashenv, "cleanup.sh", pno])
