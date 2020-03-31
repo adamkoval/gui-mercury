@@ -1,3 +1,18 @@
 # Please adjust the following entries according to your specific setup
+# HELP:
+#	- pyenv: python3 environment. Find it by typing
+#	"which python3" into your (Unix) terminal app.
+#
+#	- bashenv: bash environment. Find it by typing
+#	"which bash" into your (Unix) terminal app.
+#
+#	- mercury_path: relative path (from this file)
+#	to the git-cloned mercury6 directory.
+#
+#	- results_path: relative path (from this file)
+#	to the desired directory to pipe results to.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pyenv = /home/akoval/envs/anaconda3/bin/python
 bashenv = /bin/bash
+mercury_path = ../mercury_OG/
+results_path = ../results/
