@@ -71,25 +71,112 @@ class GenericInput(tk.Frame):
 """
 SETUP PAGE
 """
-class TextEditor(tk.Toplevel):
-    def __init__(self, parent, file):
+class BodiesEditor(tk.Toplevel):
+    def __init__(self, parent, Type):
         tk.Toplevel.__init__(self, parent)
 
-        self.file = file
         self.parent = parent
+        self.Type = Type
+
+        self.files = [file for file in os.listdir("setup") if file.endswith(".vals") and file.startswith(self.Type)]
+
+        if len(self.files) != 0:
+            self.N_bodies = GenericInput(self, "N bodies")
+            self.Generate_button = GenericButton(self, "Generate new bodies",
+                    command=lambda: [self.generate_bodies()])
+            self.generate_editor()
+        else:
+            self.N_bodies = GenericInput(self, "N bodies")
+            self.Generate_button = GenericButton(self, "Generate new bodies",
+                    command=lambda: [self.generate_bodies(), self.generate_editor()])
+
+
+    def generate_bodies(self):
+        if len(self.files) != 0:
+            os.system("rm setup/{}*.vals".format(self.Type))
+
+        # Next generate new ones
+        N = int(self.N_bodies.get_input())
+        for n in range(1, N+1):
+            f = open("setup/{}_body_{}.vals".format(self.Type, n), 'w')
+            f.write('coordinates = "Asteroidal" #Keep this in quotation marks!\n')
+            if self.Type=="small":
+                f.write("ep = 200000 #Epoch of osculation [days]\n")
+            else:
+                pass
+            f.write("\n".join(["m = 1e-3 #Mass [M_sol]",
+                "r = 1 #Hill radius [Hill radii]",
+                "d = 1 #Density [g/cm^3]",
+                "a1 = 0 #User-defined force 1",
+                "a2 = 0 #User-defined force 2",
+                "a3 = 0 #User-defined force 3",
+                "c1 = 0 #coordinate 1",
+                "c2 = 0 #coordinate 2",
+                "c3 = 0 #coordinate 3",
+                "c4 = 0 #coordinate 4",
+                "c5 = 0 #coordinate 5",
+                "c6 = 0 #coordinate 6",
+                "Lx = 0 #Spin-angular momentum (x)",
+                "Ly = 0 #Spin-angular momentum (y)",
+                "Lz = 0 #Spin-angular momentum (z)"]))
+            f.close()
+
+    def generate_editor(self):
+        instructions = """
+        Please edit each parameter using either a constant value or a function, which may contain
+        the variable 'k', such as 'parameter = k**2 + 1000', or be an independent function such
+        as 'parameter = np.random.uniform(0, 360)'.
+
+        COORDINATE SYSTEMS (for coordinates 1-6, from manual):
+            Cartesian = for xyz coordinates and velocities. Distances should be
+                        in AU and velocities in AU per day (1 day = 86400 seconds).
+
+            Asteroidal = Keplerian orbital elements, in an `asteroidal' format.
+                         i.e.  a e I g n M, where
+                            a = semi-major axis (in AU)
+                            e = eccentricity
+                            I = inclination (degrees)
+                            g = argument of pericentre (degrees)
+                            n = longitude of the ascending node (degrees)
+                            M = mean anomaly (degrees)
+
+            Cometary = Keplerian orbital elements in a `cometary' format.
+                       i.e.  q e I g n T, where
+                            q = pericentre distance (AU)
+                            e,I,g,n = as above
+                            T = epoch of pericentre (days)
+        """
+
+        self.body_no = GenericInput(self, "Body no.")
+        self.edit_body = GenericButton(self, "Edit body",
+                command=lambda: TextEditor(self, file="setup/{}_body_{}.vals".format(self.Type, self.body_no.get_input()), comment=instructions))
+
+
+class TextEditor(tk.Toplevel):
+    def __init__(self, parent, file, comment):
+        tk.Toplevel.__init__(self, parent)
+
+        self.parent = parent
+        self.file = file
+        self.comment = comment
+
+        commentbox = tk.Label(self, text=self.comment)
+        commentbox.config(justify='left')
+        commentbox.grid(column=0, row=0)
+
         text = open(file, 'r').read()
         self.textbox = tk.Text(self)
-        self.textbox.grid(column=0, row=0, sticky='nsew')
+        self.textbox.grid(column=0, row=1, sticky='nsew')
         self.textbox.insert(1.0, text)
 
         scrollbar = tk.Scrollbar(self, orient="vertical",
                 command=self.textbox.yview)
-        scrollbar.grid(column=1, row=0, sticky='nsew')
+        scrollbar.grid(column=1, row=1, sticky='nsew')
         self.textbox.configure(yscrollcommand=scrollbar.set)
 
         save_button = tk.Button(self, text="Save changes",
                 command=lambda: self.save_file())
-        save_button.grid(column=0, columnspan=2, row=1)
+        save_button.grid(column=0, columnspan=2, row=2)
 
     def save_file(self):
         text = self.textbox.get(1.0, tk.END)
@@ -131,15 +218,6 @@ class NoSetupPopup(tk.Toplevel):
         button = tk.Button(self, text="OK",
                 command=self.destroy)
         button.pack()
-
-
-def get_entries(entry_objects, dct):
-    f = open("setup/cfg.in", "w")
-    for obj in entry_objects:
-        dct[obj] = obj.get_input()
-        f.write("{}: {}\n".format(obj.label["text"], dct[obj]))
-    f.close()
-    return dct
 
 
 """
