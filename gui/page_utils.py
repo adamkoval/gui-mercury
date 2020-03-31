@@ -77,7 +77,6 @@ class BodiesEditor(tk.Toplevel):
 
         self.parent = parent
         self.Type = Type
-
         self.files = [file for file in os.listdir("setup") if file.endswith(".vals") and file.startswith(self.Type)]
 
         if len(self.files) != 0:
@@ -90,21 +89,15 @@ class BodiesEditor(tk.Toplevel):
             self.Generate_button = GenericButton(self, "Generate new bodies",
                     command=lambda: [self.generate_bodies(), self.generate_editor()])
 
-
     def generate_bodies(self):
         if len(self.files) != 0:
             os.system("rm setup/{}*.vals".format(self.Type))
-
-        # Next generate new ones
         N = int(self.N_bodies.get_input())
         for n in range(1, N+1):
-            f = open("setup/{}_body_{}.vals".format(self.Type, n), 'w')
-            f.write('coordinates = "Asteroidal" #Keep this in quotation marks!\n')
-            if self.Type=="small":
-                f.write("ep = 200000 #Epoch of osculation [days]\n")
-            else:
-                pass
-            f.write("\n".join(["m = 1e-3 #Mass [M_sol]",
+            f = open("setup/{}body{}.vals".format(self.Type, n), 'w')
+            f.write("\n".join(['coordinates = "Asteroidal" #Keep this in quotation marks!',
+                "ep = 200000 #Epoch of osculation [days]",
+                "m = 1e-3 #Mass [M_sol]",
                 "r = 1 #Hill radius [Hill radii]",
                 "d = 1 #Density [g/cm^3]",
                 "a1 = 0 #User-defined force 1",
@@ -146,10 +139,9 @@ class BodiesEditor(tk.Toplevel):
                             e,I,g,n = as above
                             T = epoch of pericentre (days)
         """
-
         self.body_no = GenericInput(self, "Body no.")
         self.edit_body = GenericButton(self, "Edit body",
-                command=lambda: TextEditor(self, file="setup/{}_body_{}.vals".format(self.Type, self.body_no.get_input()), comment=instructions))
+                command=lambda: TextEditor(self, file="setup/{}body{}.vals".format(self.Type, self.body_no.get_input()), comment=instructions))
 
 
 class TextEditor(tk.Toplevel):
