@@ -121,8 +121,7 @@ class mercury_instance:
         for file in ["files.in", "mercury6", "message.in"]:
             shutil.copyfile("{}/{}".format(self.mercury_og, file), "mercury_{}/{}".format(self.pno, file))
         os.system("chmod +x mercury_{}/mercury6".format(self.pno))
-        for file in ["big.in", "param.in", "small.in"]:
-            shutil.copyfile("../gui/setup/{}".format(file), "mercury_{}/{}".format(self.pno, file))
+        shutil.copyfile("../gui/setup/param.in", "mercury_{}/param.in".format(self.pno))
 
     def destroy(self):
         shutil.rmtree("mercury_{}".format(self.pno), ignore_errors=True)
