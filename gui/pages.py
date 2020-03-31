@@ -36,23 +36,23 @@ class SetupPage(tk.Frame):
         categories = {}
         categories[0] = self.category(self, "Simulation")
         paramin_button = pu.GenericButton(parent=categories[0], text="Simulation parameters",
-                command=lambda: pu.TextEditor(categories[0], "setup/param.in"))
-        bigin_button = pu.GenericButton(parent=categories[0], text="Big bodies",
-                command=lambda: pu.TextEditor(categories[0], "setup/big.in"))
-        smallin_button = pu.GenericButton(parent=categories[0], text="Small bodies",
-                command=lambda: pu.TextEditor(categories[0], "setup/small.in"))
-        nosimss = pu.GenericInput(categories[0], "No. sims")
+                command=lambda: pu.TextEditor(categories[0], file="setup/param.in", comment=""))
+        bigin_button = pu.GenericButton(parent=categories[0], text="Edit big bodies",
+                command=lambda: pu.BodiesEditor(categories[0], "big"))
+        smallin_button = pu.GenericButton(parent=categories[0], text="Edit small bodies",
+                command=lambda: pu.BodiesEditor(categories[0], "small"))
+        nosims = pu.GenericInput(categories[0], "No. sims")
         pnos = pu.GenericInput(categories[0], "No. parallel")
-        entry_objects = (nosimss, pnos)
+        entry_objects = (nosims, pnos)
         nos = {}
         store_button = pu.GenericButton(categories[0], text="Save config",
                 command=lambda: pu.get_entries(entry_objects, nos))
 
         categories[2] = self.category(self, "Data conversion")
         paramin_button = pu.GenericButton(categories[2], text="Edit element.in",
-                command=lambda: pu.TextEditor(categories[2], "../mcm/converter/element.in"))
+                command=lambda: pu.TextEditor(categories[2], file="../mcm/converter/element.in", comment=""))
         bigin_button = pu.GenericButton(parent=categories[2], text="Edit close.in",
-                command=lambda: pu.TextEditor(categories[2], "../mcm/converter/close.in"))
+                command=lambda: pu.TextEditor(categories[2], file="../mcm/converter/close.in", comment=""))
 
         for i in categories:
             categories[i].pack(fill='both')
