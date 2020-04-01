@@ -54,12 +54,13 @@ class NavBar(tk.Frame):
 
 
 class GenericInput(tk.Frame):
-    def __init__(self, parent, label):
+    def __init__(self, parent, label, state):
         tk.Frame.__init__(self, parent)
 
+        self.state = state
         self.label = tk.Label(self, text=label)
         self.label.pack(side="left")
-        self.field = tk.Entry(self)
+        self.field = tk.Entry(self, state=self.state)
         self.field.pack(side="right")
         self.pack()
 
@@ -71,50 +72,21 @@ class GenericInput(tk.Frame):
 """
 SETUP PAGE
 """
-class BodiesEditor(tk.Toplevel):
-    def __init__(self, parent, Type):
-        tk.Toplevel.__init__(self, parent)
+class BodiesEditor(tk.Frame):
+    def __init__(self, parent, btype):
+        tk.Frame.__init__(self, parent)
 
         self.parent = parent
-        self.Type = Type
-        self.files = [file for file in os.listdir("setup") if file.endswith(".vals") and file.startswith(self.Type)]
-
-        if len(self.files) != 0:
-            self.N_bodies = GenericInput(self, "N bodies")
-            self.Generate_button = GenericButton(self, "Generate new bodies",
-                    command=lambda: [self.generate_bodies()])
-            self.generate_editor()
+        self.btype = btype
+        self.files = [file for file in os.listdir("setup") if file.endswith(".vals") and file.startswith(self.btype)]
+        self.N_bodies = GenericInput(parent, "N bodies", state='normal')
+        self.Generate_button = GenericButton(self.parent, "Generate new bodies",
+                command=lambda: self.generate_bodies())
+        if len(self.files) == 0:
+            self.body_no = GenericInput(self.parent, "Body no.", 'disabled')
         else:
-            self.N_bodies = GenericInput(self, "N bodies")
-            self.Generate_button = GenericButton(self, "Generate new bodies",
-                    command=lambda: [self.generate_bodies(), self.generate_editor()])
+            self.body_no = GenericInput(self.parent, "Body no.", 'normal')
 
-    def generate_bodies(self):
-        if len(self.files) != 0:
-            os.system("rm setup/{}*.vals".format(self.Type))
-        N = int(self.N_bodies.get_input())
-        for n in range(1, N+1):
-            f = open("setup/{}body{}.vals".format(self.Type, n), 'w')
-            f.write("\n".join(['coordinates = "Asteroidal" #Keep this in quotation marks!',
-                "ep = 200000 #Epoch of osculation [days]",
-                "m = 1e-3 #Mass [M_sol]",
-                "r = 1 #Hill radius [Hill radii]",
-                "d = 1 #Density [g/cm^3]",
-                "a1 = 0 #User-defined force 1",
-                "a2 = 0 #User-defined force 2",
-                "a3 = 0 #User-defined force 3",
-                "c1 = 0 #coordinate 1",
-                "c2 = 0 #coordinate 2",
-                "c3 = 0 #coordinate 3",
-                "c4 = 0 #coordinate 4",
-                "c5 = 0 #coordinate 5",
-                "c6 = 0 #coordinate 6",
-                "Lx = 0 #Spin-angular momentum (x)",
-                "Ly = 0 #Spin-angular momentum (y)",
-                "Lz = 0 #Spin-angular momentum (z)"]))
-            f.close()
-
-    def generate_editor(self):
         instructions = """
         Please edit each parameter using either a constant value or a function, which may contain
         the variable 'k', such as 'parameter = k**2 + 1000', or be an independent function such
@@ -139,9 +111,37 @@ class BodiesEditor(tk.Toplevel):
                             e,I,g,n = as above
                             T = epoch of pericentre (days)
         """
-        self.body_no = GenericInput(self, "Body no.")
-        self.edit_body = GenericButton(self, "Edit body",
-                command=lambda: TextEditor(self, file="setup/{}body{}.vals".format(self.Type, self.body_no.get_input()), comment=instructions))
+
+        self.edit_body = GenericButton(parent, "Edit body",
+                command=lambda: TextEditor(self, file="setup/{}body{}.vals".format(self.btype, self.body_no.get_input()), comment=instructions))
+
+
+    def generate_bodies(self):
+        if len(self.files) != 0:
+            os.system("rm setup/{}*.vals".format(self.btype))
+        N = int(self.N_bodies.get_input())
+        for n in range(1, N+1):
+            f = open("setup/{}body{}.vals".format(self.btype, n), 'w')
+            f.write("\n".join(['coordinates = "Asteroidal" #Keep this in quotation marks!',
+                "ep = 200000 #Epoch of osculation [days]",
+                "m = 1e-3 #Mass [M_sol]",
+                "r = 1 #Hill radius [Hill radii]",
+                "d = 1 #Density [g/cm^3]",
+                "a1 = 0 #User-defined force 1",
+                "a2 = 0 #User-defined force 2",
+                "a3 = 0 #User-defined force 3",
+                "c1 = 0 #coordinate 1",
+                "c2 = 0 #coordinate 2",
+                "c3 = 0 #coordinate 3",
+                "c4 = 0 #coordinate 4",
+                "c5 = 0 #coordinate 5",
+                "c6 = 0 #coordinate 6",
+                "Lx = 0 #Spin-angular momentum (x)",
+                "Ly = 0 #Spin-angular momentum (y)",
+                "Lz = 0 #Spin-angular momentum (z)"]))
+            f.close()
+
+        self.body_no.field.config(state='normal')
 
 
 class TextEditor(tk.Toplevel):

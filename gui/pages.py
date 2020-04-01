@@ -37,12 +37,12 @@ class SetupPage(tk.Frame):
         categories[0] = self.category(self, "Simulation")
         paramin_button = pu.GenericButton(parent=categories[0], text="Simulation parameters",
                 command=lambda: pu.TextEditor(categories[0], file="setup/param.in", comment=""))
-        bigin_button = pu.GenericButton(parent=categories[0], text="Edit big bodies",
-                command=lambda: pu.BodiesEditor(categories[0], "big"))
-        smallin_button = pu.GenericButton(parent=categories[0], text="Edit small bodies",
-                command=lambda: pu.BodiesEditor(categories[0], "small"))
-        nosims = pu.GenericInput(categories[0], "No. sims")
-        pnos = pu.GenericInput(categories[0], "No. parallel")
+
+        bigin_section = pu.BodiesEditor(parent=categories[0], btype="big")
+        small_section = pu.BodiesEditor(parent=categories[0], btype="small")
+
+        nosims = pu.GenericInput(parent=categories[0], label="No. sims", state='normal')
+        pnos = pu.GenericInput(parent=categories[0], label="No. parallel", state='normal')
         entry_objects = (nosims, pnos)
         nos = {}
         store_button = pu.GenericButton(categories[0], text="Save config",
