@@ -54,13 +54,17 @@ class NavBar(tk.Frame):
 
 
 class GenericInput(tk.Frame):
-    def __init__(self, parent, label, state):
+    def __init__(self, parent, label, state, **kwargs):
         tk.Frame.__init__(self, parent)
 
         self.state = state
         self.label = tk.Label(self, text=label)
         self.label.pack(side="left")
-        self.field = tk.Entry(self, state=self.state)
+        if kwargs:
+            tv = tk.StringVar(self, value=kwargs['default'])
+        else:
+            tv = ""
+        self.field = tk.Entry(self, state=self.state, textvariable=tv)
         self.field.pack(side="right")
         self.pack()
 
@@ -69,17 +73,24 @@ class GenericInput(tk.Frame):
         return value
 
 
+class GenericCategory(tk.Frame):
+    def __init__(self, parent, title):
+        tk.Frame.__init__(self, parent, bd=5, relief="sunken")
+        label = tk.Label(self, text=title, font=("Courier", 15))
+        label.pack()
+        self.pack()
+
 """
 SETUP PAGE
 """
 class BodiesEditor(tk.Frame):
-    def __init__(self, parent, btype):
+    def __init__(self, parent, btype, default):
         tk.Frame.__init__(self, parent)
 
         self.parent = parent
         self.btype = btype
         self.files = [file for file in os.listdir("setup") if file.endswith(".vals") and file.startswith(self.btype)]
-        self.N_bodies = GenericInput(parent, "N bodies", state='normal')
+        self.N_bodies = GenericInput(parent, "N bodies", state='normal', default=default)
         self.Generate_button = GenericButton(self.parent, "Generate new bodies",
                 command=lambda: self.generate_bodies())
         if len(self.files) == 0:
@@ -212,6 +223,13 @@ class NoSetupPopup(tk.Toplevel):
         button.pack()
 
 
+def count_bodies(btype):
+    n = 0
+    for file in os.listdir("setup/"):
+        if file.startswith("{}body".format(btype)):
+            n += 1
+    return n
+
 """
 SIMULATION PAGE
 """
@@ -225,7 +243,7 @@ class StatusBox(tk.Frame):
         label.pack()
 
 
-def get_entries(entry_objects, dct):
+def get_cfgentries(entry_objects, dct):
     f = open("setup/cfg.in", "w")
     for obj in entry_objects:
         dct[obj] = obj.get_input()
@@ -266,11 +284,17 @@ def run_sims(status_box):
             n_sims = n_per_pno
         else:
             n_sims = N_sims - n_cumu
-        cmd_str.append("{} ../mcm/0main.py -no {} -pno {} & ".format(pyenv, n_sims, pno))
+        cmd_str.append("{} ../mcm/0main.py -no {} -pno {} &".format(pyenv, n_sims, pno))
         n_cumu += n_per_pno
     cmd_str = "".join(cmd_str)
     os.system(cmd_str)
     os.chdir("../gui/")
+
+
+def check_sim_status(status_box):
+    f = open("../mcm/status.txt", 'r')
+    status_str = f.readlines()
+    status_box.status_var.set("n_complete = {}".format(status_str[0]))
 
 
 """
