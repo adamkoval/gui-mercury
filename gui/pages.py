@@ -33,35 +33,37 @@ class SetupPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Setup")
 
-        categories = {}
-        categories[0] = self.category(self, "Simulation")
-        paramin_button = pu.GenericButton(parent=categories[0], text="Simulation parameters",
-                command=lambda: pu.TextEditor(categories[0], file="setup/param.in", comment=""))
+        big_section = pu.GenericCategory(self, "Big bodies")
+        n_big = pu.count_bodies("big")
+        bigin_editor = pu.BodiesEditor(big_section, btype="big", default=n_big)
 
-        bigin_section = pu.BodiesEditor(parent=categories[0], btype="big")
-        small_section = pu.BodiesEditor(parent=categories[0], btype="small")
+        small_section = pu.GenericCategory(self, "Small bodies")
+        n_small = pu.count_bodies("small")
+        small_editor = pu.BodiesEditor(small_section, btype="small", default=n_small)
 
-        nosims = pu.GenericInput(parent=categories[0], label="No. sims", state='normal')
-        pnos = pu.GenericInput(parent=categories[0], label="No. parallel", state='normal')
+        simulation = pu.GenericCategory(self, "Simulation")
+        paramin_button = pu.GenericButton(parent=simulation, text="Edit simulation parameters",
+                command=lambda: pu.TextEditor(simulation, file="setup/param.in", comment=""))
+        cfgin = "setup/cfg.in"
+        if os.path.exists(cfgin):
+            cfg = pu.read_cfg(cfgin)
+            sims_default = cfg['No. sims'][1:-1]
+            pnos_default = cfg['No. parallel'][1:-1]
+        else:
+            sims_default = ""
+            pnos_default = ""
+        nosims = pu.GenericInput(simulation, label="No. sims", state='normal', default=sims_default)
+        pnos = pu.GenericInput(simulation, label="No. parallel", state='normal', default=pnos_default)
         entry_objects = (nosims, pnos)
         nos = {}
-        store_button = pu.GenericButton(categories[0], text="Save config",
-                command=lambda: pu.get_entries(entry_objects, nos))
+        store_button = pu.GenericButton(simulation, text="Save config",
+                command=lambda: pu.get_cfgentries(entry_objects, nos))
 
-        categories[2] = self.category(self, "Data conversion")
-        paramin_button = pu.GenericButton(categories[2], text="Edit element.in",
-                command=lambda: pu.TextEditor(categories[2], file="../mcm/converter/element.in", comment=""))
-        bigin_button = pu.GenericButton(parent=categories[2], text="Edit close.in",
-                command=lambda: pu.TextEditor(categories[2], file="../mcm/converter/close.in", comment=""))
-
-        for i in categories:
-            categories[i].pack(fill='both')
-
-    def category(self, parent, title):
-        category = tk.Frame(self, bd=5, relief="sunken")
-        label = tk.Label(category, text=title, font=("Courier", 15))
-        label.pack()
-        return category
+        data_conversion = pu.GenericCategory(self, "Data conversion")
+        paramin_button = pu.GenericButton(data_conversion, text="Edit element.in",
+                command=lambda: pu.TextEditor(data_conversion, file="../mcm/converter/element.in", comment=""))
+        bigin_button = pu.GenericButton(parent=data_conversion, text="Edit close.in",
+                command=lambda: pu.TextEditor(data_conversion, file="../mcm/converter/close.in", comment=""))
 
 
 class AnalysisPage(tk.Frame):
@@ -69,16 +71,10 @@ class AnalysisPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Analysis")
 
-        files_input = pu.GenericInput(self, label="Filetype,Range", state='normal')
-        convert_button = pu.GenericButton(self, text="Launch conversion",
+        data_conversion = pu.GenericCategory(self, "Convert data")
+        files_input = pu.GenericInput(data_conversion, label="Filetype,Range", state='normal')
+        convert_button = pu.GenericButton(data_conversion, text="Launch conversion",
                 command=lambda: pu.convert_files(files=files_input.get_input()))
-
-        #convert_all_button = pu.GenericButton(self, text="Convert all output",
-        #        comman=lambda: pu.convert_files(file="all"))
-
-        #convert_one_input = pu.GenericInput(self, label="Path to output file:", state='normal')
-        #convert_one_button = pu.GenericButton(self, text="Convert file",
-        #        command=lambda: pu.convert_files(file=convert_one_input.get_input()))
 
 
 class SimPage(tk.Frame):
@@ -86,10 +82,15 @@ class SimPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
-        status_box = pu.StatusBox(self)
-        status_box.status_var.set("Ready to run.")
+        pre_status_box = pu.StatusBox(self)
+        pre_status_box.status_var.set("Ready to run.")
         go_button = pu.GenericButton(self, text="Run",
-                command=lambda: pu.run_sims(status_box))
+                command=lambda: pu.run_sims(pre_status_box))
+
+        sim_status_box = pu.StatusBox(self)
+        sim_status_box.status_var.set("n_completed = 0")
+        check_status_button = pu.GenericButton(self, text="Check status",
+                command=lambda: pu.check_sim_status(sim_status_box))
 
 
 class SetupPopup(tk.Toplevel):
