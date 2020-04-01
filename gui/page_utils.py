@@ -3,12 +3,12 @@ import sys
 import shutil
 import tkinter as tk
 from subprocess import Popen
-sys.path.append("../")
 
+sys.path.append("../")
 import mcm.func as mcfn
-#
-#   Utilities to be used in pages
-#
+
+# Some global definitions
+pyenv, bashenv, mercuryOG_path, rslts_path = mcfn.read_envfile("../mcm/envfile.txt")
 
 """
 EVERY PAGE
@@ -245,6 +245,7 @@ def read_cfg(cfgin):
 
 
 def run_sims(status_box):
+    global pyenv
     cfg = read_cfg("setup/cfg.in")
     cfg_str = "".join(["{}:{}".format(var, cfg[var]) for var in cfg])
     status_str = """Simulation config:\n
@@ -265,7 +266,7 @@ def run_sims(status_box):
             n_sims = n_per_pno
         else:
             n_sims = N_sims - n_cumu
-        cmd_str.append("python3 ../mcm/0main.py -no {} -pno {} & ".format(n_sims, pno))
+        cmd_str.append("{} ../mcm/0main.py -no {} -pno {} & ".format(pyenv, n_sims, pno))
         n_cumu += n_per_pno
     cmd_str = "".join(cmd_str)
     os.system(cmd_str)
@@ -275,5 +276,8 @@ def run_sims(status_box):
 """
 ANALYSIS PAGE
 """
-
-
+def convert_files(files):
+    global pyenv
+    os.chdir("../mcm/")
+    os.system("{} ../mcm/convert_files.py -f {}".format(pyenv, files))
+    os.chdir("../gui/")
