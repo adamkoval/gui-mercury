@@ -42,4 +42,4 @@ for outfile in outputs:
     convfiles = [file for file in os.listdir("converter/") if file.endswith(ext)]
     [shutil.copyfile("converter/{}".format(file), "{}/{}-{}".format(destination, k, file)) for file in convfiles]
     [os.remove("converter/{}".format(file)) for file in convfiles]
-    os.remove("converter/*.out")
+    [os.remove("converter/{}".format(file)) for file in os.listdir("converter/") if file.endswith(".out")]
