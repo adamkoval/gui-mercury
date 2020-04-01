@@ -5,6 +5,7 @@
 ##
 import numpy as np
 import os
+import re
 import sys
 import shutil
 
@@ -119,9 +120,44 @@ class mercury_instance:
     def create(self):
         os.mkdir("mercury_{}".format(self.pno))
         for file in ["files.in", "mercury6", "message.in"]:
-            shutil.copyfile("{}/{}".format(self.mercury_og, file), "mercury_{}/{}".format(self.pno, file))
+            shutil.copyfile("{}/{}".format(self.mercury_og, file),
+                    "mercury_{}/{}".format(self.pno, file))
         os.system("chmod +x mercury_{}/mercury6".format(self.pno))
-        shutil.copyfile("../gui/setup/param.in", "mercury_{}/param.in".format(self.pno))
+        shutil.copyfile("../gui/setup/param.in",
+                "mercury_{}/param.in".format(self.pno))
 
     def destroy(self):
         shutil.rmtree("mercury_{}".format(self.pno), ignore_errors=True)
+
+
+def sort(outputs, ftype, rang):
+    # Sort by ftype
+    if ftype == "both":
+        outputs = [file for file in outputs if file[-6:-4] in ("xv", "ce")]
+    elif ftype == "xv":
+        outputs = [file for file in outputs if file[-6:-4] == "xv"]
+    elif ftype == "ce":
+        outputs = [file for file in outputs if file[-6:-4] == "ce"]
+    else:
+        print(' ~~~~~~~~~~~~~~~~~~~~~~~~\n',
+                'func.py/sorter.sortby_body():\n',
+                'Please enter either "xv", "ce" or "both".\n')
+        return
+
+    # Sort by range
+    if rang == "all":
+        pass
+    elif re.match("[0-9]+\-[0-9]+", rang):
+        rang0 = int(rang.split("-")[0])
+        rang1 = int(rang.split("-")[1])
+        outputs = [file for file in outputs if int(file[:-7]) in range(rang0, rang1)]
+    elif re.match("[0-9]+", rang):
+        outputs = [file for file in outputs if file[:-7]==rang]
+    else:
+        print(' ~~~~~~~~~~~~~~~~~~~~~~~~\n',
+                'func.py/sorter.sortby_range():\n',
+                'Please enter either single number e.g. "599",\n',
+                'a range e.g. "32-344" (incl-excl), or "both".\n')
+        return
+
+    return outputs
