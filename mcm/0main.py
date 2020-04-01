@@ -43,11 +43,11 @@ while k < N_runs:
     #      "Run = {}\n".format(k))
 
     # Generate small.in
-    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(k), "-btype", "small"])
+    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(n_completed), "-btype", "small"])
     p_randomize.wait()
 
     # Generate big.in
-    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(k), "-btype", "big"])
+    p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(n_completed), "-btype", "big"])
     p_randomize.wait()
 
     # Cleaning up old files from mercury dir
@@ -71,6 +71,18 @@ while k < N_runs:
     shutil.copyfile("mercury_{}/param.in".format(pno), "{}/inputs/{}-param.in".format(rslts_path, n_completed))
 
     k +=1
+
+    if os.path.exists("status.txt"):
+        f = open("status.txt", 'r')
+        curr_n = int(f.read())
+        new_n = curr_n + 1
+        os.remove("status.txt")
+    else:
+        new_n = 1
+    f = open("status.txt", 'w')
+    f.write(str(new_n))
+    f.close()
+
 
 # Destroy mercury instance
 m_inst.destroy()
