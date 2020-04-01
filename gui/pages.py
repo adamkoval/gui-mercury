@@ -69,6 +69,17 @@ class AnalysisPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Analysis")
 
+        files_input = pu.GenericInput(self, label="Filetype,Range", state='normal')
+        convert_button = pu.GenericButton(self, text="Launch conversion",
+                command=lambda: pu.convert_files(files=files_input.get_input()))
+
+        #convert_all_button = pu.GenericButton(self, text="Convert all output",
+        #        comman=lambda: pu.convert_files(file="all"))
+
+        #convert_one_input = pu.GenericInput(self, label="Path to output file:", state='normal')
+        #convert_one_button = pu.GenericButton(self, text="Convert file",
+        #        command=lambda: pu.convert_files(file=convert_one_input.get_input()))
+
 
 class SimPage(tk.Frame):
     def __init__(self, parent, controller):
