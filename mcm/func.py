@@ -108,7 +108,7 @@ def make_rsltpath(results_path):
         make_if(path)
 
 
-class mercury_instance:
+class MercuryInstance:
     """
     Offers utilities to create and destroy a mercury instance from
     the compiled git version.

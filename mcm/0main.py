@@ -32,7 +32,7 @@ mcfn.make_rsltpath(rslts_path)
 n_completed = mcfn.count_completed(rslts_path)
 
 # Create instance of mercury
-m_inst = mcfn.mercury_instance(pno, mercuryOG_path)
+m_inst = mcfn.MercuryInstance(pno, mercuryOG_path)
 m_inst.create()
 
 # Main loop
