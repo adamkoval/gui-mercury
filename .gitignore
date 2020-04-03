@@ -7,6 +7,7 @@ envfile.txt
 
 # Mercury folder (as this should be built for each os separately)
 mcm/mercury*/
+mcm/converter/
 mcm/__pycache__/
 mercury_OG/
 
