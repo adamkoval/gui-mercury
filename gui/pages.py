@@ -39,8 +39,7 @@ class HomePage(tk.Frame):
             [nav_button.button.configure(state='disabled') for nav_button in nav_buttons]
         else:
             text = tk.Label(setup_section, text="envfile.txt already exists\n."
-                    + "No action needed.\n"
-                    + "Proceed to `setup' page.")
+                    + "No action needed.\n")
             text.pack()
             self.thispage.navbar.man_button.configure(state='active')
 
@@ -94,14 +93,36 @@ class SimPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
-        pre_status_box = pu.StatusBox(self)
+        simulation = pu.GenericCategory(self, "Set up sims")
+        paramin_button = pu.GenericButton(parent=simulation, text="Edit simulation parameters",
+                command=lambda: [pu.create_setupdir(),
+                    pu.TextEditor(simulation, file="setup/param.in", comment="")])
+        cfgin = "setup/cfg.in"
+        if os.path.exists(cfgin):
+            cfg = pu.read_cfg(cfgin)
+            sims_default = cfg['No. sims'][1:-1]
+            pnos_default = cfg['No. parallel'][1:-1]
+        else:
+            sims_default = ""
+            pnos_default = ""
+        nosims = pu.GenericInput(simulation, label="No. sims", state='normal', default=sims_default)
+        pnos = pu.GenericInput(simulation, label="No. parallel", state='normal', default=pnos_default)
+        pnos_disclaimer = tk.Label(simulation, text="WARNING: running too many parallel\nprocesses may saturate the\nmemory pool and cause crashes.")
+        pnos_disclaimer.pack()
+        entry_objects = (nosims, pnos)
+        nos = {}
+        store_button = pu.GenericButton(simulation, text="Save config",
+                command=lambda: pu.get_cfgentries(entry_objects, nos))
+
+        run = pu.GenericCategory(self, "Launch sims")
+        pre_status_box = pu.StatusBox(run)
         pre_status_box.status_var.set("Ready to run.")
-        go_button = pu.GenericButton(self, text="Run",
+        go_button = pu.GenericButton(run, text="Run",
                 command=lambda: pu.run_sims(pre_status_box))
 
-        sim_status_box = pu.StatusBox(self)
+        sim_status_box = pu.StatusBox(run)
         sim_status_box.status_var.set("n_completed = 0")
-        check_status_button = pu.GenericButton(self, text="Check status",
+        check_status_button = pu.GenericButton(run, text="Check status",
                 command=lambda: pu.check_sim_status(sim_status_box))
 
 
