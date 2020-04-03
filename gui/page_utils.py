@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import shutil
+import time
 import numpy as np
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -220,6 +221,8 @@ class TextEditor(tk.Toplevel):
 
 def count_bodies(btype):
     n = 0
+    if not os.path.exists("setup/"):
+        create_setupdir()
     for file in os.listdir("setup/"):
         if file.startswith("{}body".format(btype)):
             n += 1
@@ -230,7 +233,8 @@ def create_setupdir():
     mercuryOG_path = mcfn.read_envfile("../mcm/envfile.txt", "mercury_path")
     if not os.path.exists("setup/"):
         os.mkdir("setup/")
-    shutil.copyfile("{}/param.in".format(mercuryOG_path), "setup/")
+    if not os.path.exists("setup/param.in"):
+        shutil.copyfile("{}/param.in".format(mercuryOG_path), "setup/param.in")
 
 
 """
@@ -267,6 +271,7 @@ def read_cfg(cfgin):
 
 def run_sims(status_box):
     pyenv = mcfn.read_envfile("../mcm/envfile.txt", "pyenv")
+    rslts_path = mcfn.read_envfile("../mcm/envfile.txt", "results_path")
     cfg = read_cfg("setup/cfg.in")
     cfg_str = "".join(["{}:{}".format(var, cfg[var]) for var in cfg])
     status_str = """Simulation config:\n
@@ -281,17 +286,19 @@ def run_sims(status_box):
     n_cumu = 0
 
     os.chdir("../mcm/")
+    if os.path.exists("status.txt"):
+        os.remove("status.txt")
     cmd_str = []
     for pno in range(1, n_parallel+1):
         if not pno == n_parallel:
             n_sims = n_per_pno
         else:
             n_sims = N_sims - n_cumu
-        cmd_str.append("{} ../mcm/0main.py -no {} -pno {} &".format(pyenv, n_sims, pno))
+        os.system("{} ../mcm/0main.py -no {} -pno {} &".format(pyenv, n_sims, pno))
+        time.sleep(2)
         n_cumu += n_per_pno
-    cmd_str = "".join(cmd_str)
-    os.system(cmd_str)
     os.chdir("../gui/")
+    shutil.copyfile("setup/param.in", "{}/param.in".format(rslts_path))
 
 
 def check_sim_status(status_box):
@@ -361,6 +368,8 @@ class Plotter(tk.Toplevel):
             xdat = data[xvars[0]]
             ydat = data[yvars[0]]
             self.plots.append(self.ax.plot(xdat, ydat, label=body))
+        if log:
+            self.ax.set_xscale("log")
         self.ax.set_xlabel(self.label_dct[xvars[0]])
         self.ax.set_ylabel(self.label_dct[yvars[0]])
         self.ax.legend()
@@ -389,14 +398,11 @@ class FigureFrame(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.fig = fig
-
         self.canvas = FigureCanvasTkAgg(fig, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack()
-
         self.toolbar = NavigationToolbar2Tk(self.canvas, self)
         self.toolbar.update()
-
         self.pack()
 
 
@@ -404,24 +410,30 @@ class VariablesBar(tk.Frame):
     def __init__(self, parent, headers, bodies):
         tk.Frame.__init__(self, parent)
 
-        self.checkstates = {'bodies': {}, 'xvars': {}, 'yvars': {}}
-        lists = [bodies, headers, headers]
+        self.checkstates = {'bodies': {}, 'xvars': {}, 'yvars': {}, 'log': {}}
+        lists = [bodies, headers, headers, ["log"]]
 
         for i, cat in enumerate(self.checkstates):
             section = tk.Frame(self)
-            label = tk.Label(section, text=cat)
-            label.grid(row=0, column=0, columnspan=3)
+            label = tk.Label(section, text="{} - ".format(cat))
+            label.grid(row=0, column=0)
             for j, var in enumerate(lists[i]):
                 self.checkstates[cat][var] = tk.BooleanVar(self)
-                chk = tk.Checkbutton(section, text=var, var=self.checkstates[cat][var])
-                if cat == 'bodies' and j == 0:
+                if not var=='log':
+                    text = var
+                else:
+                    text = ""
+                chk = tk.Checkbutton(section, text=text, var=self.checkstates[cat][var])
+                if cat == 'bodies':
                     self.checkstates[cat][var].set(True)
                 elif cat == 'xvars' and var == 'Time (years)':
                     self.checkstates[cat][var].set(True)
                 elif cat == 'yvars' and var == 'a':
                     self.checkstates[cat][var].set(True)
+                elif cat == 'log':
+                    self.checkstates[cat][var].set(True)
                 else:
                     pass
-                chk.grid(row=1, column=j)
+                chk.grid(row=0, column=j+1)
             section.pack()
         self.pack()
