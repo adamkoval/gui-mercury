@@ -22,11 +22,6 @@ class MainApp(tk.Tk):
             page.grid(row=0, column=0, sticky="NESW")
 
         self.show_page("HomePage")
-        check_setup = pg.SetupPopup(self)
-            #nosetup.tkraise()
-        #else:
-
-
 
     def show_page(self, page_name):
         page = self.pages[page_name]
