@@ -48,6 +48,7 @@ class HomePage(tk.Frame):
         envfile = "../mcm/envfile.txt"
         shutil.copyfile("../mcm/envfile_example.txt", envfile)
         envfile_editor = pu.TextEditor(self, envfile, "")
+        pu.create_setupdir()
         self.thispage.navbar.man_button.configure(state='active')
         nav_buttons = self.thispage.navbar.nav_buttons
         [nav_button.button.configure(state='active') for nav_button in nav_buttons]
@@ -68,7 +69,8 @@ class SetupPage(tk.Frame):
 
         simulation = pu.GenericCategory(self, "Simulation")
         paramin_button = pu.GenericButton(parent=simulation, text="Edit simulation parameters",
-                command=lambda: pu.TextEditor(simulation, file="setup/param.in", comment=""))
+                command=lambda: [pu.create_setupdir(),
+                    pu.TextEditor(simulation, file="setup/param.in", comment="")])
         cfgin = "setup/cfg.in"
         if os.path.exists(cfgin):
             cfg = pu.read_cfg(cfgin)
@@ -79,6 +81,8 @@ class SetupPage(tk.Frame):
             pnos_default = ""
         nosims = pu.GenericInput(simulation, label="No. sims", state='normal', default=sims_default)
         pnos = pu.GenericInput(simulation, label="No. parallel", state='normal', default=pnos_default)
+        pnos_disclaimer = tk.Label(simulation, text="WARNING: running too many parallel\nprocesses may saturate the\nmemory pool and cause crashes.")
+        pnos_disclaimer.pack()
         entry_objects = (nosims, pnos)
         nos = {}
         store_button = pu.GenericButton(simulation, text="Save config",
