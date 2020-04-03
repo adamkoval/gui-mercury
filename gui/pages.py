@@ -13,7 +13,7 @@ import mcm.func as mcfn
 class HomePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        pu.GenericPage(self, controller, "Home")
+        self.thispage = pu.GenericPage(self, controller, "Home")
 
         container = tk.Frame(self, bd=5, relief="sunken")
         container.pack()
@@ -34,15 +34,23 @@ class HomePage(tk.Frame):
         if not os.path.exists("../mcm/envfile.txt"):
             envfile_button = pu.GenericButton(setup_section, text="Set up paths",
                     command=lambda: self.initial_setup())
+            self.thispage.navbar.man_button.configure(state='disabled')
+            nav_buttons = self.thispage.navbar.nav_buttons
+            [nav_button.button.configure(state='disabled') for nav_button in nav_buttons]
         else:
-            text = tk.Label(setup_section, text="envfile.txt already exists\n,"
-                    + "no action needed. Proceed to `setup' page.")
+            text = tk.Label(setup_section, text="envfile.txt already exists\n."
+                    + "No action needed.\n"
+                    + "Proceed to `setup' page.")
             text.pack()
+            self.thispage.navbar.man_button.configure(state='active')
 
     def initial_setup(self):
         envfile = "../mcm/envfile.txt"
         shutil.copyfile("../mcm/envfile_example.txt", envfile)
         envfile_editor = pu.TextEditor(self, envfile, "")
+        self.thispage.navbar.man_button.configure(state='active')
+        nav_buttons = self.thispage.navbar.nav_buttons
+        [nav_button.button.configure(state='active') for nav_button in nav_buttons]
 
 
 class SetupPage(tk.Frame):

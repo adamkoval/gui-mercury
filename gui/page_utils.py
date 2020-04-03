@@ -27,16 +27,7 @@ class GenericPage(tk.Frame):
         label = tk.Label(parent, text=page_name,
                 font=("calibri", 15))
         label.pack()
-        navbar = NavBar(parent, controller, all_buttons, page_name)
-
-
-class NavButton(tk.Frame):
-    def __init__(self, parent, controller, text, dest, col, state):
-        tk.Frame.__init__(self, parent)
-
-        button = tk.Button(parent, text=text, state=state,
-                command=lambda: controller.show_page(dest))
-        button.grid(row=0, column=col)
+        self.navbar = NavBar(parent, controller, all_buttons, page_name)
 
 
 class NavBar(tk.Frame):
@@ -44,16 +35,26 @@ class NavBar(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.controller = controller
+        self.nav_buttons = []
         for i, text in enumerate(buttons):
             dest = buttons[text]
             if curr_page == text:
-                NavButton(self, controller, text, dest, i, 'disabled')
+                self.nav_buttons.append(NavButton(self, controller, text, dest, i, 'disabled'))
             else:
-                NavButton(self, controller, text, dest, i, 'active')
-        man_button = tk.Button(self, text="mercury6.man",
+                self.nav_buttons.append(NavButton(self, controller, text, dest, i, 'active'))
+        self.man_button = tk.Button(self, text="mercury6.man",
                 command=lambda: ManReader(self))
-        man_button.grid(row=0, column=i+1)
+        self.man_button.grid(row=0, column=i+1)
         self.pack(side="bottom")
+
+
+class NavButton(tk.Frame):
+    def __init__(self, parent, controller, text, dest, col, state):
+        tk.Frame.__init__(self, parent)
+
+        self.button = tk.Button(parent, text=text, state=state,
+                command=lambda: controller.show_page(dest))
+        self.button.grid(row=0, column=col)
 
 
 class ManReader(tk.Toplevel):
