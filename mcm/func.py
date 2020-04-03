@@ -39,34 +39,6 @@ def read_envfile(envfile, path):
             return [globals()[name] for name in names]
 
 
-def disp(res_float, fraction, direction=''):
-    """
-    For the outer planet, sets initial displacement outside of
-    or migration distance inside of the resonance under
-    consideration.
-    In:
-        > res_float - (float) fractional value of resonance
-        under consideration, i.e., 2/1=2.0, 5/3=1.66667, and
-        so on
-        > fraction - (float) fraction of distance
-        between neighboring resonances by which to
-        displace the outer planet
-        > direction - (str) 'in' or 'out', depending on
-        whether the user sets the initial displacement or
-        the final displacement inside of the resonance
-    Out:
-        > disp - displacement from resonance in T_i/T_o.
-    """
-    res_floats = [9/7, 4/3, 7/5, 3/2, 5/3, 2/1, 3/1]
-    for i in range(1, len(res_floats)-1):
-        if res_floats[i] == res_float:
-            if direction == 'out':
-                disp = fraction * (res_floats[i+1] - res_floats[i])
-            elif direction == 'in':
-                disp = fraction * (res_floats[i] - res_floats[i-1])
-    return disp
-
-
 def count_completed(results_path):
     """
     Counts number of files present in the results directory.
@@ -76,9 +48,6 @@ def count_completed(results_path):
         > N_completed - (int) number of completed runs
         present in the directory.
     """
-    #print(' ~~~~~~~~~~~~~~~~~~~~~~~~\n',
-    #      'func.py/count_completed():\n',
-    #      'Checking results directory.\n')
     dirs = ['inputs', 'outputs']
     numbers = {}
     for _dir in dirs:
@@ -86,16 +55,6 @@ def count_completed(results_path):
 
     N_completed = int(numbers['inputs'])//3
     return N_completed
-
-    #if numbers['inputs'] == numbers['outputs']:
-    #    N_completed = int(numbers['inputs'])//3
-    #    return N_completed
-    #else:
-    #    print(' Please check the numbers of runs in each output directory:\n',
-    #          '     N_inputs: {}\n'.format(numbers['inputs']),
-    #          '     N_outputs: {}\n'.format(numbers['outputs']),
-    #          '~~~~~~~~~~~~~~~~~~~~~~~~\n')
-    #    sys.exit()
 
 
 def make_rsltpath(results_path):
