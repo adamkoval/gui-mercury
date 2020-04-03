@@ -23,38 +23,62 @@ class GenericPage(tk.Frame):
                 "Setup": 'SetupPage',
                 "Simulation": 'SimPage',
                 "Analysis": 'AnalysisPage'}
-        buttons = {key: all_buttons[key] for key in all_buttons if key != page_name}
         tk.Frame.__init__(self, parent)
         label = tk.Label(parent, text=page_name,
                 font=("calibri", 15))
         label.pack()
-        navbar = NavBar(parent, controller, buttons)
+        navbar = NavBar(parent, controller, all_buttons, page_name)
+
+
+class NavButton(tk.Frame):
+    def __init__(self, parent, controller, text, dest, col, state):
+        tk.Frame.__init__(self, parent)
+
+        button = tk.Button(parent, text=text, state=state,
+                command=lambda: controller.show_page(dest))
+        button.grid(row=0, column=col)
+
+
+class NavBar(tk.Frame):
+    def __init__(self, parent, controller, buttons, curr_page):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+        for i, text in enumerate(buttons):
+            dest = buttons[text]
+            if curr_page == text:
+                NavButton(self, controller, text, dest, i, 'disabled')
+            else:
+                NavButton(self, controller, text, dest, i, 'active')
+        man_button = tk.Button(self, text="mercury6.man",
+                command=lambda: ManReader(self))
+        man_button.grid(row=0, column=i+1)
+        self.pack(side="bottom")
+
+
+class ManReader(tk.Toplevel):
+    def __init__(self, parent):
+        tk.Toplevel.__init__(self, parent)
+
+        mercuryOG_path = mcfn.read_envfile("../mcm/envfile.txt", "mercury_path")
+        man_file = "{}/mercury6.man".format(mercuryOG_path)
+        text = open(man_file, 'r').read()
+
+        textbox = tk.Text(self)
+        textbox.insert(1.0, text)
+        textbox.configure(state='disable')
+        textbox.pack(side="left", fill="y")
+
+        scrollbar = tk.Scrollbar(self, orient="vertical",
+                command=textbox.yview)
+        scrollbar.pack(side="right", fill="y")
+        textbox.configure(yscrollcommand=scrollbar.set)
 
 
 class GenericButton(tk.Button):
     def __init__(self, parent, text, command):
         tk.Button.__init__(self, parent, text=text, command=command)
         self.pack()
-
-
-class NavButton(tk.Frame):
-    def __init__(self, parent, controller, text, dest, col):
-        tk.Frame.__init__(self, parent)
-
-        button = tk.Button(parent, text=text,
-                command=lambda: controller.show_page(dest))
-        button.grid(row=0, column=col)
-
-
-class NavBar(tk.Frame):
-    def __init__(self, parent, controller, buttons):
-        tk.Frame.__init__(self, parent)
-
-        self.controller = controller
-        for i, text in enumerate(buttons):
-            dest = buttons[text]
-            NavButton(self, controller, text, dest, i)
-        self.pack(side="bottom")
 
 
 class GenericInput(tk.Frame):
