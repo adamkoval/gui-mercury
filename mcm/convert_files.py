@@ -8,7 +8,7 @@ from subprocess import Popen
 
 import func as mcfn
 
-pyenv, bashenv, mercuryOG_path, rslts_path = mcfn.read_envfile("envfile.txt")
+pyenv, bashenv, mercuryOG_path, rslts_path = mcfn.read_envfile("envfile.txt", "all")
 
 if rslts_path.endswith("/"):
     rslts_path = rslts_path[:-1]
