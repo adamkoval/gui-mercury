@@ -1,8 +1,11 @@
 import tkinter as tk
-
 import os
+import sys
+import shutil
 
 import page_utils as pu
+sys.path.append("../")
+import mcm.func as mcfn
 
 #
 #   Pages
@@ -26,6 +29,20 @@ class HomePage(tk.Frame):
         blurb.pack()
         signed = tk.Label(container, text="Written by A. Koval, in the year 2020.")
         signed.pack()
+
+        setup_section = pu.GenericCategory(self, "Initial Setup")
+        if not os.path.exists("../mcm/envfile.txt"):
+            envfile_button = pu.GenericButton(setup_section, text="Set up paths",
+                    command=lambda: self.initial_setup())
+        else:
+            text = tk.Label(setup_section, text="envfile.txt already exists\n,"
+                    + "no action needed. Proceed to `setup' page.")
+            text.pack()
+
+    def initial_setup(self):
+        envfile = "../mcm/envfile.txt"
+        shutil.copyfile("../mcm/envfile_example.txt", envfile)
+        envfile_editor = pu.TextEditor(self, envfile, "")
 
 
 class SetupPage(tk.Frame):
@@ -59,23 +76,6 @@ class SetupPage(tk.Frame):
         store_button = pu.GenericButton(simulation, text="Save config",
                 command=lambda: pu.get_cfgentries(entry_objects, nos))
 
-        data_conversion = pu.GenericCategory(self, "Data conversion")
-        paramin_button = pu.GenericButton(data_conversion, text="Edit element.in",
-                command=lambda: pu.TextEditor(data_conversion, file="../mcm/converter/element.in", comment=""))
-        bigin_button = pu.GenericButton(parent=data_conversion, text="Edit close.in",
-                command=lambda: pu.TextEditor(data_conversion, file="../mcm/converter/close.in", comment=""))
-
-
-class AnalysisPage(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        pu.GenericPage(self, controller, "Analysis")
-
-        data_conversion = pu.GenericCategory(self, "Convert data")
-        files_input = pu.GenericInput(data_conversion, label="Filetype,Range", state='normal')
-        convert_button = pu.GenericButton(data_conversion, text="Launch conversion",
-                command=lambda: pu.convert_files(files=files_input.get_input()))
-
 
 class SimPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -93,37 +93,23 @@ class SimPage(tk.Frame):
                 command=lambda: pu.check_sim_status(sim_status_box))
 
 
-class SetupPopup(tk.Toplevel):
-    def __init__(self, parent):
-        tk.Toplevel.__init__(self, parent)
+class AnalysisPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        pu.GenericPage(self, controller, "Analysis")
 
-        setup = self.check_setup()
-        label = tk.Label(self, text=self.check_setup())
-        label.pack()
-        button = tk.Button(self, text="OK",
-                command=self.destroy)
-        button.pack()
+        data_conversion = pu.GenericCategory(self, "Convert data")
+        paramin_button = pu.GenericButton(data_conversion, text="Edit element.in",
+                command=lambda: pu.TextEditor(data_conversion,
+                    file="../mcm/converter/element.in", comment=""))
+        bigin_button = pu.GenericButton(parent=data_conversion, text="Edit close.in",
+                command=lambda: pu.TextEditor(data_conversion,
+                    file="../mcm/converter/close.in", comment=""))
+        files_input = pu.GenericInput(data_conversion, label="Filetype,Range", state='normal')
+        convert_button = pu.GenericButton(data_conversion, text="Launch conversion",
+                command=lambda: pu.convert_files(files=files_input.get_input()))
 
-    def check_setup(self):
-        setup = os.listdir('setup/')
-        if len(setup) == 0:
-            return str("No previous setup detected.\n"
-                    +"Please go to the 'Setup' page\n"
-                    +"and create a new setup.")
-        elif 'big.in' not in setup:
-            return str("big.in is missing.\n"
-                    +"Please provide one or go to\n"
-                    +"the 'Setup' page to create a\n"
-                    +"new setup.")
-        elif 'small.in' not in setup:
-            return str("small.in is missing.\n"
-                    +"Please provide one or go to\n"
-                    +"the 'Setup' page to create a\n"
-                    +"new setup.")
-        elif 'param.in' not in setup:
-            return str("param.in is missing.\n"
-                    +"Please provide one or go to\n"
-                    +"the 'Setup' page to create a\n"
-                    +"new setup.")
-        else:
-            return str("Old setup found.")
+        plotting = pu.GenericCategory(self, "Plot")
+        k_input = pu.GenericInput(plotting, label="File", state="normal")
+        generate_options_button = pu.GenericButton(plotting, text="Plot",
+                 command=lambda: pu.Plotter(plotting, k_input.get_input()))
