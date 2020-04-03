@@ -9,7 +9,7 @@ import re
 import sys
 import shutil
 
-def read_envfile(envfile):
+def read_envfile(envfile, path):
     """
     Reads in envfile to assign local environments of
     python and bash.
@@ -24,11 +24,19 @@ def read_envfile(envfile):
         lines = [line for line in f.readlines() if line[0] is not '#']
         names = []
         for line in lines:
-            name = line.split()[0]
-            value = line.split()[2]
-            globals()[name] = value
-            names.append(name)
-        return [globals()[name] for name in names]
+            if not re.match("\S+", line):
+                pass
+            else:
+                name = line.split()[0]
+                value = line.split()[2]
+                if value.endswith("/"):
+                    value = value[:-1]
+                globals()[name] = value
+                names.append(name)
+        if path != "all":
+            return globals()[path]
+        else:
+            return [globals()[name] for name in names]
 
 
 def disp(res_float, fraction, direction=''):
@@ -106,6 +114,15 @@ def make_rsltpath(results_path):
 
     for path in paths:
         make_if(path)
+
+
+def create_converter(mercury_og):
+    if not os.path.exists("converter/"):
+        os.mkdir("converter/")
+    for file in ["close.in", "close6", "element.in", "element6", "message.in"]:
+        shutil.copyfile("{}/{}".format(mercury_og, file), "converter/{}".format(file))
+    for file in ["close6", "element6"]:
+        os.system("chmod +x converter/{}".format(file))
 
 
 class MercuryInstance:
