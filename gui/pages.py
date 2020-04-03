@@ -54,10 +54,10 @@ class HomePage(tk.Frame):
         [nav_button.button.configure(state='active') for nav_button in nav_buttons]
 
 
-class SetupPage(tk.Frame):
+class BodiesPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        pu.GenericPage(self, controller, "Setup")
+        pu.GenericPage(self, controller, "Bodies")
 
         big_section = pu.GenericCategory(self, "Big bodies")
         n_big = pu.count_bodies("big")

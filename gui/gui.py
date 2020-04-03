@@ -15,7 +15,7 @@ class MainApp(tk.Tk):
         mainframe.grid_columnconfigure(0, weight=1)
 
         self.pages = {}
-        for _page in (pg.HomePage, pg.SimPage, pg.AnalysisPage, pg.SetupPage):
+        for _page in (pg.HomePage, pg.SimPage, pg.AnalysisPage, pg.BodiesPage):
             page_name = _page.__name__
             page = _page(parent=mainframe, controller=self)
             self.pages[page_name] = page

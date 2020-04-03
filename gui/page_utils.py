@@ -21,7 +21,7 @@ EVERY PAGE
 class GenericPage(tk.Frame):
     def __init__(self, parent, controller, page_name):
         all_buttons = {"Home": 'HomePage',
-                "Setup": 'SetupPage',
+                "Bodies": 'BodiesPage',
                 "Simulation": 'SimPage',
                 "Analysis": 'AnalysisPage'}
         tk.Frame.__init__(self, parent)
