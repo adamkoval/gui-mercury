@@ -1,15 +1,19 @@
 import os
+import re
 import sys
 import shutil
+import numpy as np
 import tkinter as tk
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 from subprocess import Popen
 
 sys.path.append("../")
 import mcm.func as mcfn
-
-# Some global definitions
-pyenv, bashenv, mercuryOG_path, rslts_path = mcfn.read_envfile("../mcm/envfile.txt")
-
+#
+# PAGE UTILITIES
+#
 """
 EVERY PAGE
 """
@@ -80,6 +84,7 @@ class GenericCategory(tk.Frame):
         label.pack()
         self.pack()
 
+
 """
 SETUP PAGE
 """
@@ -125,7 +130,6 @@ class BodiesEditor(tk.Frame):
 
         self.edit_body = GenericButton(parent, "Edit body",
                 command=lambda: TextEditor(self, file="setup/{}body{}.vals".format(self.btype, self.body_no.get_input()), comment=instructions))
-
 
     def generate_bodies(self):
         if len(self.files) != 0:
@@ -189,46 +193,20 @@ class TextEditor(tk.Toplevel):
         self.destroy()
 
 
-class TextWindow(tk.Frame):
-    def __init__(self, parent, file):
-        tk.Frame.__init__(self, parent)
-        self.file = file
-        self.parent = parent
-
-        text = open(self.file, 'r').read()
-        textbox = tk.Text(parent)
-        textbox.pack(side="left")
-        textbox.insert(1.0, text)
-
-        scrollbar = tk.Scrollbar(parent, orient="vertical", command=textbox.yview)
-        scrollbar.pack(side="right", expand=True, fill='y')
-
-
-    def save_file(self):
-        text = self.textbox.get(1.0, tk.END)
-        f = open(self.file, 'w')
-        f.write(text)
-        f.close()
-        self.parent.destroy()
-
-
-class NoSetupPopup(tk.Toplevel):
-    def __init__(self, parent):
-        tk.Toplevel.__init__(self, parent)
-
-        label = tk.Label(self, text="No previous setup detected.\nPlease go to the 'Setup' page.")
-        label.pack()
-        button = tk.Button(self, text="OK",
-                command=self.destroy)
-        button.pack()
-
-
 def count_bodies(btype):
     n = 0
     for file in os.listdir("setup/"):
         if file.startswith("{}body".format(btype)):
             n += 1
     return n
+
+
+def create_setupdir():
+    mercuryOG_path = mcfn.read_envfile("../mcm/envfile.txt", "mercury_path")
+    if not os.path.exists("setup/"):
+        os.mkdir("setup/")
+    shutil.copyfile("{}/param.in".format(mercuryOG_path), "setup/")
+
 
 """
 SIMULATION PAGE
@@ -263,7 +241,7 @@ def read_cfg(cfgin):
 
 
 def run_sims(status_box):
-    global pyenv
+    pyenv = mcfn.read_envfile("../mcm/envfile.txt", "pyenv")
     cfg = read_cfg("setup/cfg.in")
     cfg_str = "".join(["{}:{}".format(var, cfg[var]) for var in cfg])
     status_str = """Simulation config:\n
@@ -301,7 +279,124 @@ def check_sim_status(status_box):
 ANALYSIS PAGE
 """
 def convert_files(files):
-    global pyenv
+    pyenv = mcfn.read_envfile("../mcm/envfile.txt", "pyenv")
     os.chdir("../mcm/")
+    if not os.path.exists("converter/"):
+        mercuryOG_path = mcfn.read_envfile("envfile.txt", "mercury_path")
+        mcfn.create_converter(mercuryOG_path)
+    else:
+        pass
     os.system("{} ../mcm/convert_files.py -f {}".format(pyenv, files))
     os.chdir("../gui/")
+
+
+class Plotter(tk.Toplevel):
+    def __init__(self, parent, k):
+        tk.Toplevel.__init__(self, parent)
+
+        self.k = k
+        self.rslts_path = mcfn.read_envfile("../mcm/envfile.txt", "results_path")
+        self.conv_out_path = "{}/converted_outputs".format(self.rslts_path)
+        self.label_dct = {
+                'Time (years)': "Time [years]", 'long': "long_perih [deg]", 'M': "M [deg]",
+                'a': "a [AU]", 'e': "e", 'i': "I [deg]", 'peri': "arg_perih [deg]",
+                'node': "long_asc [deg]", 'Q': "apo_dist [AU]", 'dens': "density [g/cm^3]",
+                'f': "true_anom [deg]", 'oblq': "obliq [deg]", 'r': "r_dist [AU]",
+                'spin': "spin_per [days]", 'x': "x_pos [m]", 'y': "y_pos [m]", 'z': "z_pos [m]",
+                'vx': "x_vel [m/s]", 'vy': "y_vel [m/s]", 'vz': "z_vel [m/s]"
+                }
+
+        bodies = []
+        for k in self.k.split(","):
+            for body in os.listdir(self.conv_out_path):
+                if re.match('({})\-'.format(k), body) and body.endswith(".aei"):
+                    bodies.append(body)
+        headers = self.read_aei("{}/{}".format(self.conv_out_path, bodies[0]), "headers")
+        self.var_bar = VariablesBar(self, headers, bodies)
+
+        self.fig = Figure()
+        self.ax = self.fig.add_subplot(111)
+        self.fig_frame = FigureFrame(self, self.fig)
+
+        plot_button = GenericButton(self, text="Plot",
+                command=lambda: self.make_plot())
+
+    def make_plot(self):
+        del self.ax.lines[:]
+
+        checkstates = self.var_bar.checkstates
+        for cat in checkstates:
+            dct = checkstates[cat]
+            globals()[cat] = [var for var in dct if dct[var].get()==True]
+
+        self.plots = []
+        for body in bodies:
+            path = "{}/{}".format(self.conv_out_path, body)
+            data = self.read_aei(path, "data")
+            xdat = data[xvars[0]]
+            ydat = data[yvars[0]]
+            self.plots.append(self.ax.plot(xdat, ydat, label=body))
+        self.ax.set_xlabel(self.label_dct[xvars[0]])
+        self.ax.set_ylabel(self.label_dct[yvars[0]])
+        self.ax.legend()
+        plt.show()
+
+        self.fig_frame.canvas.draw()
+
+    def read_aei(self, file, which):
+        f = open(file, 'r')
+        lines = f.readlines()
+        headers = re.split('\s\s+', lines[3])
+        headers = headers[1:-1]
+        if which=="headers":
+            return headers
+        elif which=="data":
+            dct = {}
+            for i, header in enumerate(headers):
+                dct[header] = [float(line.split()[i])
+                        if not re.match("\*+", line.split()[i])
+                        else np.nan for line in lines[4:]]
+            return dct
+
+
+class FigureFrame(tk.Frame):
+    def __init__(self, parent, fig):
+        tk.Frame.__init__(self, parent)
+
+        self.fig = fig
+
+        self.canvas = FigureCanvasTkAgg(fig, self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack()
+
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self)
+        self.toolbar.update()
+
+        self.pack()
+
+
+class VariablesBar(tk.Frame):
+    def __init__(self, parent, headers, bodies):
+        tk.Frame.__init__(self, parent)
+
+        self.checkstates = {'bodies': {}, 'xvars': {}, 'yvars': {}}
+        lists = [bodies, headers, headers]
+
+        for i, cat in enumerate(self.checkstates):
+            section = tk.Frame(self)
+            label = tk.Label(section, text=cat)
+            label.grid(row=0, column=0, columnspan=3)
+            for j, var in enumerate(lists[i]):
+                self.checkstates[cat][var] = tk.BooleanVar(self)
+                chk = tk.Checkbutton(section, text=var, var=self.checkstates[cat][var])
+                if cat == 'bodies' and j == 0:
+                    self.checkstates[cat][var].set(True)
+                elif cat == 'xvars' and var == 'Time (years)':
+                    self.checkstates[cat][var].set(True)
+                elif cat == 'yvars' and var == 'a':
+                    self.checkstates[cat][var].set(True)
+                else:
+                    pass
+                chk.grid(row=1, column=j)
+            section.pack()
+        self.pack()
