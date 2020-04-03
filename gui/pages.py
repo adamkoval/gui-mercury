@@ -66,27 +66,6 @@ class BodiesPage(tk.Frame):
         n_small = pu.count_bodies("small")
         small_editor = pu.BodiesEditor(small_section, btype="small", default=n_small)
 
-        simulation = pu.GenericCategory(self, "Simulation")
-        paramin_button = pu.GenericButton(parent=simulation, text="Edit simulation parameters",
-                command=lambda: [pu.create_setupdir(),
-                    pu.TextEditor(simulation, file="setup/param.in", comment="")])
-        cfgin = "setup/cfg.in"
-        if os.path.exists(cfgin):
-            cfg = pu.read_cfg(cfgin)
-            sims_default = cfg['No. sims'][1:-1]
-            pnos_default = cfg['No. parallel'][1:-1]
-        else:
-            sims_default = ""
-            pnos_default = ""
-        nosims = pu.GenericInput(simulation, label="No. sims", state='normal', default=sims_default)
-        pnos = pu.GenericInput(simulation, label="No. parallel", state='normal', default=pnos_default)
-        pnos_disclaimer = tk.Label(simulation, text="WARNING: running too many parallel\nprocesses may saturate the\nmemory pool and cause crashes.")
-        pnos_disclaimer.pack()
-        entry_objects = (nosims, pnos)
-        nos = {}
-        store_button = pu.GenericButton(simulation, text="Save config",
-                command=lambda: pu.get_cfgentries(entry_objects, nos))
-
 
 class SimPage(tk.Frame):
     def __init__(self, parent, controller):
