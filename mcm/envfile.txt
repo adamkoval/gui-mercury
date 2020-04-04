@@ -1,4 +1,0 @@
-pyenv = /home/akoval/envs/anaconda3/bin/python
-bashenv = /bin/bash
-mercury_path = ../mercury_OG/
-results_path = ../results/
