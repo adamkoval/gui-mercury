@@ -1,2 +1,0 @@
-# Please adjust the following entries according to your requirements
-resonance = 21

@@ -7,6 +7,7 @@ import importlib
 
 import func as fn
 
+# Preliminaries
 parser = argparse.ArgumentParser()
 parser.add_argument('--process_no', '-pno',
                     dest='process_no',
@@ -28,7 +29,7 @@ Msol = 1.989e30 # kg
 # Creating an input file
 bodyin = open("mercury_{}/{}.in".format(pno, btype), 'w')
 
-# Finding all body files
+# Find all body files and use them to create big.in & small.in
 body_files = [file for file in os.listdir("../gui/setup/") if file.startswith(btype) and file.endswith(".vals")]
 
 if len(body_files) != 0:
@@ -87,6 +88,5 @@ else:
             " style (Cartesian, Asteroidal, Cometary) = Cartesian",
             " epoch (in days) = 0",
             ")---------------------------------------------------------------------\n"]))
-
 
 bodyin.close()

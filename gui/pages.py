@@ -6,11 +6,13 @@ import shutil
 import page_utils as pu
 sys.path.append("../")
 import mcm.func as mcfn
-
 #
 #   Pages
 #
 class HomePage(tk.Frame):
+    """
+    Contains welcome message and initial setup section.
+    """
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.thispage = pu.GenericPage(self, controller, "Home")
@@ -18,6 +20,7 @@ class HomePage(tk.Frame):
         container = tk.Frame(self, bd=5, relief="sunken")
         container.pack()
 
+        # Welcome section
         welcome = tk.Label(container, text="MERCURY_gui",
                 font=("adura", 15))
         welcome.pack()
@@ -30,6 +33,7 @@ class HomePage(tk.Frame):
         signed = tk.Label(container, text="Written by A. Koval, in the year 2020.")
         signed.pack()
 
+        # Setup section
         setup_section = pu.GenericCategory(self, "Initial Setup")
         if not os.path.exists("../mcm/envfile.txt"):
             envfile_button = pu.GenericButton(setup_section, text="Set up paths",
@@ -43,10 +47,25 @@ class HomePage(tk.Frame):
             text.pack()
             self.thispage.navbar.man_button.configure(state='active')
 
+    # Function to run initial setup window if no envfile.txt is found
     def initial_setup(self):
         envfile = "../mcm/envfile.txt"
         shutil.copyfile("../mcm/envfile_example.txt", envfile)
-        envfile_editor = pu.TextEditor(self, envfile, "")
+        envfile_editor = pu.TextEditor(self, envfile,
+                comment="Please adjust the following entries according to your specific setup.\n"
+                + "\n"
+                + "HELP:\n"
+                + "'pyenv': local python3 environment. Find it by typing\n"
+                + "'which python3' into your (Unix) terminal app.\n"
+                + "\n"
+                + "'bashenv': local bash environment. Find it by typing\n"
+                + "'which bash' into your (Unix) terminal app.\n"
+                + "\n"
+                + "'mercury_path': relative path (from this file)\n"
+                + "to the git-cloned mercury6 directory.\n"
+                + "\n"
+                + "'results_path': relative path (from this file)\n"
+                + "to the desired directory to pipe results to.\n")
         pu.create_setupdir()
         self.thispage.navbar.man_button.configure(state='active')
         nav_buttons = self.thispage.navbar.nav_buttons
@@ -54,6 +73,9 @@ class HomePage(tk.Frame):
 
 
 class BodiesPage(tk.Frame):
+    """
+    Allows generation of big and small bodies.
+    """
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Bodies")
@@ -68,10 +90,16 @@ class BodiesPage(tk.Frame):
 
 
 class SimPage(tk.Frame):
+    """
+    Allows the setup of simulation parameters, like number of simulations,
+    number of parallel processes to run and editing MERCURY6's param.in file,
+    and launches simulations, allowing the user to check their status.
+    """
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Simulation")
 
+        # Simulation setup section
         simulation = pu.GenericCategory(self, "Set up sims")
         paramin_button = pu.GenericButton(parent=simulation, text="Edit simulation parameters",
                 command=lambda: [pu.create_setupdir(),
@@ -93,6 +121,7 @@ class SimPage(tk.Frame):
         store_button = pu.GenericButton(simulation, text="Save config",
                 command=lambda: pu.get_cfgentries(entry_objects, nos))
 
+        # Simulation launch section
         run = pu.GenericCategory(self, "Launch sims")
         pre_status_box = pu.StatusBox(run)
         pre_status_box.status_var.set("Ready to run.")
@@ -106,10 +135,14 @@ class SimPage(tk.Frame):
 
 
 class AnalysisPage(tk.Frame):
+    """
+    Includes data-conversion section and plotter launch.
+    """
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         pu.GenericPage(self, controller, "Analysis")
 
+        # Data conversion
         data_conversion = pu.GenericCategory(self, "Convert data")
         paramin_button = pu.GenericButton(data_conversion, text="Edit element.in",
                 command=lambda: pu.TextEditor(data_conversion,
@@ -118,10 +151,16 @@ class AnalysisPage(tk.Frame):
                 command=lambda: pu.TextEditor(data_conversion,
                     file="../mcm/converter/close.in", comment=""))
         files_input = pu.GenericInput(data_conversion, label="Filetype,Range", state='normal')
+        files_input_instructs = tk.Label(data_conversion,
+                text="Filetypes include 'xv', 'ce' or 'out'.\n"
+                + "Range can have format '0', '0-4', 'all',\n"
+                + "where numbers are only an example.")
+        files_input_instructs.pack()
         convert_button = pu.GenericButton(data_conversion, text="Launch conversion",
                 command=lambda: pu.convert_files(files=files_input.get_input()))
 
+        # Plotter
         plotting = pu.GenericCategory(self, "Plot")
         k_input = pu.GenericInput(plotting, label="File", state="normal")
-        generate_options_button = pu.GenericButton(plotting, text="Plot",
+        generate_options_button = pu.GenericButton(plotting, text="Run plotter",
                  command=lambda: pu.Plotter(plotting, k_input.get_input()))

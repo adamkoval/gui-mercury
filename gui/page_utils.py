@@ -19,6 +19,9 @@ import mcm.func as mcfn
 EVERY PAGE
 """
 class GenericPage(tk.Frame):
+    """
+    Controls the layout of every page in the GUI.
+    """
     def __init__(self, parent, controller, page_name):
         all_buttons = {"Home": 'HomePage',
                 "Bodies": 'BodiesPage',
@@ -32,6 +35,9 @@ class GenericPage(tk.Frame):
 
 
 class NavBar(tk.Frame):
+    """
+    Navigation bar at the bottom of every page.
+    """
     def __init__(self, parent, controller, buttons, curr_page):
         tk.Frame.__init__(self, parent)
 
@@ -50,6 +56,9 @@ class NavBar(tk.Frame):
 
 
 class NavButton(tk.Frame):
+    """
+    Buttons on the navigation bar.
+    """
     def __init__(self, parent, controller, text, dest, col, state):
         tk.Frame.__init__(self, parent)
 
@@ -59,6 +68,9 @@ class NavButton(tk.Frame):
 
 
 class ManReader(tk.Toplevel):
+    """
+    Manual reader on the navigation bar.
+    """
     def __init__(self, parent):
         tk.Toplevel.__init__(self, parent)
 
@@ -78,12 +90,18 @@ class ManReader(tk.Toplevel):
 
 
 class GenericButton(tk.Button):
+    """
+    Controls every button in the GUI.
+    """
     def __init__(self, parent, text, command):
         tk.Button.__init__(self, parent, text=text, command=command)
         self.pack()
 
 
 class GenericInput(tk.Frame):
+    """
+    Controls every entry field in the GUI.
+    """
     def __init__(self, parent, label, state, **kwargs):
         tk.Frame.__init__(self, parent)
 
@@ -104,6 +122,10 @@ class GenericInput(tk.Frame):
 
 
 class GenericCategory(tk.Frame):
+    """
+    Controls the appearance of every section within individual
+    pages.
+    """
     def __init__(self, parent, title):
         tk.Frame.__init__(self, parent, bd=5, relief="sunken")
         label = tk.Label(self, text=title, font=("Courier", 15))
@@ -115,6 +137,9 @@ class GenericCategory(tk.Frame):
 SETUP PAGE
 """
 class BodiesEditor(tk.Frame):
+    """
+    Allows the user to edit big or small bodies.
+    """
     def __init__(self, parent, btype, default):
         tk.Frame.__init__(self, parent)
 
@@ -157,6 +182,7 @@ class BodiesEditor(tk.Frame):
         self.edit_body = GenericButton(parent, "Edit body",
                 command=lambda: TextEditor(self, file="setup/{}body{}.vals".format(self.btype, self.body_no.get_input()), comment=instructions))
 
+    # Generate the chosen number of bodies (overwrites old ones)
     def generate_bodies(self):
         if len(self.files) != 0:
             os.system("rm setup/{}*.vals".format(self.btype))
@@ -186,6 +212,11 @@ class BodiesEditor(tk.Frame):
 
 
 class TextEditor(tk.Toplevel):
+    """
+    Used a number of times throughout, this text editor is
+    a pop-up window allowing one to access and edit any file
+    which is supplied to it via function call.
+    """
     def __init__(self, parent, file, comment):
         tk.Toplevel.__init__(self, parent)
 
@@ -211,6 +242,7 @@ class TextEditor(tk.Toplevel):
                 command=lambda: self.save_file())
         save_button.grid(column=0, columnspan=2, row=2)
 
+    # Function to save the file in its original location
     def save_file(self):
         text = self.textbox.get(1.0, tk.END)
         f = open(self.file, 'w')
@@ -220,6 +252,10 @@ class TextEditor(tk.Toplevel):
 
 
 def count_bodies(btype):
+    """
+    Counts the number of bodies existing in the setup
+    directory.
+    """
     n = 0
     if not os.path.exists("setup/"):
         create_setupdir()
@@ -230,6 +266,10 @@ def count_bodies(btype):
 
 
 def create_setupdir():
+    """
+    Creates setup directory to contain a number of files
+    used by the GUI if the directory does not yet exist.
+    """
     mercuryOG_path = mcfn.read_envfile("../mcm/envfile.txt", "mercury_path")
     if not os.path.exists("setup/"):
         os.mkdir("setup/")
@@ -241,6 +281,10 @@ def create_setupdir():
 SIMULATION PAGE
 """
 class StatusBox(tk.Frame):
+    """
+    Displays the status of simulations
+    (i.e., number of completed simulations).
+    """
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.pack()
@@ -251,6 +295,10 @@ class StatusBox(tk.Frame):
 
 
 def get_cfgentries(entry_objects, dct):
+    """
+    Read cfg file which specifies number of simulations
+    and number of parallel processes to split them into.
+    """
     f = open("setup/cfg.in", "w")
     for obj in entry_objects:
         dct[obj] = obj.get_input()
@@ -260,6 +308,9 @@ def get_cfgentries(entry_objects, dct):
 
 
 def read_cfg(cfgin):
+    """
+    Reads cfg file.
+    """
     f = open(cfgin, "r")
     lines = f.readlines()
     dct = {}
@@ -270,6 +321,10 @@ def read_cfg(cfgin):
 
 
 def run_sims(status_box):
+    """
+    Main function to speak with MERCURY6 manager scripts to
+    execute the desired number of simulations.
+    """
     pyenv = mcfn.read_envfile("../mcm/envfile.txt", "pyenv")
     rslts_path = mcfn.read_envfile("../mcm/envfile.txt", "results_path")
     cfg = read_cfg("setup/cfg.in")
@@ -302,6 +357,9 @@ def run_sims(status_box):
 
 
 def check_sim_status(status_box):
+    """
+    Checks simulation status file.
+    """
     f = open("../mcm/status.txt", 'r')
     status_str = f.readlines()
     status_box.status_var.set("n_complete = {}".format(status_str[0]))
@@ -311,6 +369,9 @@ def check_sim_status(status_box):
 ANALYSIS PAGE
 """
 def convert_files(files):
+    """
+    Function to run file-conversion.
+    """
     pyenv = mcfn.read_envfile("../mcm/envfile.txt", "pyenv")
     os.chdir("../mcm/")
     if not os.path.exists("converter/"):
@@ -323,6 +384,9 @@ def convert_files(files):
 
 
 class Plotter(tk.Toplevel):
+    """
+    Plotting utility to display converted results.
+    """
     def __init__(self, parent, k):
         tk.Toplevel.__init__(self, parent)
 
@@ -353,6 +417,7 @@ class Plotter(tk.Toplevel):
         plot_button = GenericButton(self, text="Plot",
                 command=lambda: self.make_plot())
 
+    # The actual plotting is done here
     def make_plot(self):
         del self.ax.lines[:]
 
@@ -377,6 +442,7 @@ class Plotter(tk.Toplevel):
 
         self.fig_frame.canvas.draw()
 
+    # Read in data from .aei file
     def read_aei(self, file, which):
         f = open(file, 'r')
         lines = f.readlines()
@@ -394,6 +460,9 @@ class Plotter(tk.Toplevel):
 
 
 class FigureFrame(tk.Frame):
+    """
+    Frame to contain all of the objects in the plotter.
+    """
     def __init__(self, parent, fig):
         tk.Frame.__init__(self, parent)
 
@@ -407,6 +476,10 @@ class FigureFrame(tk.Frame):
 
 
 class VariablesBar(tk.Frame):
+    """
+    Bar displayed at the top of the plotter which contains all available
+    variables for plotting.
+    """
     def __init__(self, parent, headers, bodies):
         tk.Frame.__init__(self, parent)
 

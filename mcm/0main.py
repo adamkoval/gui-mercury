@@ -3,10 +3,13 @@ import argparse
 import pandas
 import sys
 import shutil
+import time
+import numpy as np
 from subprocess import Popen
 
 import func as mcfn
 
+# Preliminaries
 pyenv, bashenv, mercuryOG_path, rslts_path = mcfn.read_envfile("envfile.txt", "all")
 if rslts_path.endswith("/"):
     rslts_path = rslts_path[:-1]
@@ -38,9 +41,11 @@ m_inst.create()
 # Main loop
 k = 0
 while k < N_runs:
-    #print(" ~~~~~~~~~~~~~~~~~~~~~~~~\n",
-    #      "0main.py:\n",
-    #      "Run = {}\n".format(k))
+    time.sleep(np.random.uniform(0, 5))
+
+    # Count completed
+    n_completed = mcfn.count_completed(rslts_path)
+    print(" n_completed = {}\n".format(n_completed))
 
     # Generate small.in
     p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(n_completed), "-btype", "small"])
@@ -50,7 +55,7 @@ while k < N_runs:
     p_randomize = Popen([pyenv, "randomize.py", "-pno", pno, "-k", str(n_completed), "-btype", "big"])
     p_randomize.wait()
 
-    # Cleaning up old files from mercury dir
+    # Clean up old files from mercury dir
     p_cleanup = Popen([bashenv, "cleanup.sh", pno])
     p_cleanup.wait()
 
@@ -58,11 +63,7 @@ while k < N_runs:
     p_launch_mercury = Popen([bashenv, "launch_mercury.sh", pno])
     p_launch_mercury.wait()
 
-    n_completed = mcfn.count_completed(rslts_path)
-    print(" n_completed = {}\n".format(n_completed))
-    #print(" Mercury completed, copying files\n",
-    #      "~~~~~~~~~~~~~~~~~~~~~~~~\n")
-
+    # Copy files
     shutil.copyfile("mercury_{}/xv.out".format(pno), "{}/outputs/{}-xv.out".format(rslts_path, n_completed))
     shutil.copyfile("mercury_{}/ce.out".format(pno), "{}/outputs/{}-ce.out".format(rslts_path, n_completed))
     shutil.copyfile("mercury_{}/info.out".format(pno), "{}/outputs/{}-info.out".format(rslts_path, n_completed))
@@ -72,17 +73,22 @@ while k < N_runs:
 
     k +=1
 
+    # Get status
     if os.path.exists("status.txt"):
         f = open("status.txt", 'r')
         curr_n = int(f.read())
+        f.close()
         new_n = curr_n + 1
-        os.remove("status.txt")
+        try:
+            os.remove("status.txt")
+        except:
+            pass
     else:
         new_n = 1
     f = open("status.txt", 'w')
     f.write(str(new_n))
     f.close()
-
+    time.sleep(np.random.uniform(0, 5))
 
 # Destroy mercury instance
 m_inst.destroy()

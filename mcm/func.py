@@ -76,6 +76,10 @@ def make_rsltpath(results_path):
 
 
 def create_converter(mercury_og):
+    """
+    Create converter directory if it doesn't already
+    exist.
+    """
     if not os.path.exists("converter/"):
         os.mkdir("converter/")
     for file in ["close.in", "close6", "element.in", "element6", "message.in"]:
@@ -107,6 +111,9 @@ class MercuryInstance:
 
 
 def sort(outputs, ftype, rang):
+    """
+    Sorts desired outputs for conversion.
+    """
     # Sort by ftype
     if ftype == "both":
         outputs = [file for file in outputs if file[-6:-4] in ("xv", "ce")]
